@@ -66,6 +66,8 @@
 
 ## 📷 Screenshots
 
+_Note: coming soon._
+
 <p align="center">
   <img src="Assets/screenshots/recording_screen.png" alt="Recording Screen" width="250">
   <img src="Assets/screenshots/transcription_list.png" alt="Transcription List" width="250">
@@ -77,6 +79,8 @@
 ---
 
 ## 🎥 Demo Video
+
+_Note: coming soon._
 
 [![Demo Video](https://img.youtube.com/vi/YourVideoID/0.jpg)](https://www.youtube.com/watch?v=YourVideoID)
 
