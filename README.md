@@ -1,111 +1,230 @@
 
-# WhisperTranscriptionApp
 
-## Overview
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/username/ScribeAI">
+    <img src="Assets/logo.png" alt="ScribeAI Logo" width="300" style="max-width: 100%;">
+  </a>
+</div>
 
-WhisperTranscriptionApp is an advanced iOS 17+ application that enables on-device audio transcription using OpenAI's Whisper model, transformed into CoreML format for local processing. Designed for private and efficient transcription, this app offers continuous audio recording that operates in the background, displaying active status in iOS 17’s Dynamic Island and Live Activities. All transcription processing and storage are handled locally on the device to ensure a seamless, offline experience.
+<p align="center">
+  Revolutionizing healthcare documentation with instant, accurate, on-device medical transcription that lets providers focus on what matters most - patient care.
+  <br />
+  <a href="https://github.com/username/ScribeAI/issues">Report Bug</a>
+  ·
+  <a href="https://github.com/username/ScribeAI/issues">Request Feature</a>
+</p>
 
-## Key Features
+<!-- BADGES -->
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-iOS_17+-blue.svg" alt="Platform" />
+  <img src="https://img.shields.io/badge/swift-5.5+-orange.svg" alt="Swift" />
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
+  <img src="https://img.shields.io/badge/CoreML-Whisper_Model-brightgreen.svg" alt="CoreML" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+  <img src="https://img.shields.io/badge/Maintained-Yes-blue.svg" alt="Maintained" />
+</p>
 
-- **On-Device Real-Time Transcription**: Utilizing OpenAI's Whisper model, the app transcribes audio without requiring an internet connection.
-- **Continuous Background Recording**: Users can record audio while the app is minimized or the device is locked.
-- **Dynamic Island & Live Activities**: iOS 17's Dynamic Island and Live Activities are leveraged to show ongoing recording status and transcription progress.
-- **Local Data Management**: Recordings and transcriptions are stored locally, allowing users to manage files directly within the app.
+---
 
-## Technical Requirements
+## 📋 Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Screenshots](#screenshots)
+- [Demo Video](#demo-video)
+- [Technical Requirements](#technical-requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Directory Structure](#directory-structure)
+- [Development Phases](#development-phases)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+
+---
+
+## 📖 Overview
+
+**ScribeAI** is an advanced iOS application designed for on-device audio transcription using OpenAI's Whisper model, transformed into Core ML format for local processing. It offers private and efficient transcription with continuous background audio recording, leveraging iOS 17’s Dynamic Island and Live Activities to display active status. All transcription processing and storage are handled locally on the device, ensuring a seamless, offline experience.
+
+---
+
+## ✨ Key Features
+
+- **🔍 On-Device Real-Time Transcription**: Transcribe audio without any internet connection using OpenAI's Whisper model.
+- **⏺️ Continuous Background Recording**: Record audio even when the app is minimized or the device is locked.
+- **🌐 Dynamic Island & Live Activities**: Utilize iOS 17's Dynamic Island and Live Activities to display ongoing recording status and transcription progress.
+- **💾 Local Data Management**: Store recordings and transcriptions locally, allowing direct management within the app.
+- **🔒 Privacy-Focused**: All data processing is done on-device, ensuring user privacy and data security.
+- **📱 Responsive UI/UX**: Designed with a focus on accessibility and responsiveness across all iOS devices.
+- **🎨 Customizable Themes**: Choose between Light and Dark modes for optimal viewing.
+- **🌍 Multi-Language Support**: Transcribe audio in multiple languages with ease.
+
+---
+
+## 📷 Screenshots
+
+<p align="center">
+  <img src="Assets/screenshots/recording_screen.png" alt="Recording Screen" width="250">
+  <img src="Assets/screenshots/transcription_list.png" alt="Transcription List" width="250">
+  <img src="Assets/screenshots/transcription_view.png" alt="Transcription View" width="250">
+</p>
+
+*Recording Screen with real-time transcription, Transcription List, and Transcription View.*
+
+---
+
+## 🎥 Demo Video
+
+[![Demo Video](https://img.youtube.com/vi/YourVideoID/0.jpg)](https://www.youtube.com/watch?v=YourVideoID)
+
+*Click the image above to watch the demo video.*
+
+---
+
+## 🛠 Technical Requirements
 
 - **Platform**: iOS 17+
-- **Programming Language**: Swift
-- **CoreML**: Pre-converted Whisper model in CoreML format
+- **Programming Language**: Swift 5.5+
+- **Xcode**: Version 15 or later
+- **Core ML Model**: Pre-converted Whisper model in Core ML format
 
-## Directory Structure
+---
 
-- **WhisperTranscriptionApp.xcodeproj**: Xcode project file for the app setup.
-- **WhisperTranscriptionApp/**: Main application code directory.
-  - **AppDelegate.swift**: Manages app lifecycle.
-  - **SceneDelegate.swift**: Manages window configurations and background handling.
-  - **Models/WhisperModel.mlmodel**: The CoreML-converted Whisper model.
-  - **Models/WhisperModelManager.swift**: Singleton manager for loading and interfacing with the Whisper model.
-  - **Views/**: Contains UI components for audio recording, transcription display, and management.
-  - **ViewModels/**: Handles core logic for recording, transcription, and Dynamic Island updates.
-  - **Managers/**: Classes for managing local storage of transcriptions, audio files, and Live Activities.
-  - **Utilities/ErrorAlertManager.swift**: Helper for handling and displaying error messages.
+## 🚀 Installation
 
-## Prerequisites
+### Prerequisites
 
-- **Xcode 15** or later
-- **Swift**: Latest stable version compatible with iOS 17+
-- **Whisper Model**: Pre-converted to CoreML format using the provided Python script
+- **Xcode 15** or later installed on your Mac.
+- **Swift**: Latest stable version compatible with iOS 17+.
+- **Whisper Model**: Pre-converted to Core ML format using the provided Python script.
+- **CocoaPods** or **Swift Package Manager** (if using external dependencies).
 
-## Installation
+### Steps
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/username/WhisperTranscriptionApp.git
+   git clone https://github.com/username/ScribeAI.git
    ```
-2. Open `WhisperTranscriptionApp.xcodeproj` in Xcode.
-3. Enable necessary permissions under `Info.plist`.
 
-## Development Phases
+2. **Navigate to the project directory**:
+   ```bash
+   cd ScribeAI
+   ```
 
-The following 10 phases provide a highly detailed guide to assist developers in building each component of the app.
+3. **Install Dependencies** (if any):
 
-1. **Project Setup and Configuration**:  
-   - Initialize the Xcode project with the appropriate settings for iOS 17+.
-   - Set Swift as the primary programming language.
-   - Configure the deployment target and other project settings.
-   - Add necessary dependencies and frameworks, such as CoreML and AVFoundation.
+   - **Using CocoaPods**:
+     ```bash
+     pod install
+     open ScribeAI.xcworkspace
+     ```
 
-2. **User Interface Design**:  
-   - Design the app's UI components using SwiftUI or UIKit.
-   - Create screens for onboarding, login, transcription display, and settings.
-   - Ensure the UI is responsive and supports various device sizes.
-   - Incorporate Dynamic Island and Live Activities UI elements.
+   - **Using Swift Package Manager**:
 
-3. **Whisper Model Integration**:  
-   - Use the provided Python script to convert the OpenAI Whisper model to CoreML format.
-   - Integrate the CoreML model into the app.
-   - Test the model's compatibility and performance on device.
+     Open `ScribeAI.xcodeproj` and resolve packages.
 
-4. **Audio Recording Implementation**:  
-   - Implement continuous audio recording functionality.
-   - Configure `AVAudioSession` for background recording.
-   - Handle microphone permissions and user prompts.
-   - Ensure recording continues when the app is minimized or the device is locked.
+4. **Obtain the Whisper Core ML Model**:
 
-5. **Real-Time Transcription**:  
-   - Process audio input through the Whisper model for transcription.
-   - Optimize for real-time performance and minimal latency.
-   - Display transcribed text to the user as it's processed.
-   - Handle different languages and accents if applicable.
+   - Use the provided Python script `ModelConversionScripts/convert_whisper_to_coreml.py` to convert the Whisper model to Core ML format.
+   - Place the converted `WhisperModel.mlmodel` into the `Models/` directory.
 
-6. **Dynamic Island & Live Activities Integration**:  
-   - Leverage iOS 17 APIs to display ongoing recording status.
-   - Update transcription progress in the Dynamic Island and Live Activities.
-   - Ensure smooth animations and minimal impact on device resources.
+5. **Update Project Settings**:
 
-7. **Local Data Storage and Management**:  
-   - Implement local storage for audio recordings and transcriptions.
-   - Use Core Data or file management APIs for data persistence.
-   - Provide a user interface for managing saved transcriptions.
-   - Implement features like search, delete, and share for transcriptions.
+   - Open the project in Xcode.
+   - Set the **Team** under **Signing & Capabilities**.
+   - Ensure that **Background Modes**, **App Groups**, and other necessary capabilities are enabled.
 
-8. **Authentication and Onboarding**:  
-   - Create onboarding screens for first-time users.
-   - Implement authentication if required (e.g., Sign in with Apple).
-   - Store user preferences and settings securely.
-   - Guide users through granting necessary permissions.
+6. **Configure Permissions**:
 
-9. **Error Handling and User Feedback**:  
-   - Utilize `ErrorAlertManager` to display user-friendly error messages.
-   - Handle common errors such as permission denials or model loading failures.
-   - Provide feedback during long operations (e.g., loading spinners).
-   - Ensure the app remains stable under unexpected conditions.
+   - Enable necessary permissions under `Info.plist`:
+     - `NSMicrophoneUsageDescription`
+     - `NSSpeechRecognitionUsageDescription`
+     - `NSSupportsLiveActivities`
 
-10. **Testing and Optimization**:  
-    - Write unit tests and UI tests to cover key functionalities.
-    - Optimize the app for performance and battery efficiency.
-    - Profile the app to identify and fix memory leaks or bottlenecks.
-    - Prepare the app for App Store submission by adhering to guidelines.
+7. **Build and Run**:
+
+   - Select your target device or simulator (iOS 17+).
+   - Press **Cmd+R** to build and run the app.
+
+---
+
+## 📚 Usage
+
+1. **Launch the App**:
+
+   - Open the app on your iOS device.
+
+2. **Start Recording**:
+
+   - Tap the **Start Recording** button to begin transcription.
+   - The app will start transcribing audio in real-time.
+
+3. **Background Recording**:
+
+   - Minimize the app or lock your device; recording continues in the background.
+   - Check the Dynamic Island or Lock Screen for live updates.
+
+4. **View Transcriptions**:
+
+   - Access the **Transcriptions** tab to view, search, delete, or share saved transcriptions.
+
+5. **Settings**:
+
+   - Customize app settings according to your preferences.
+   - Choose themes, manage privacy settings, and more.
+
+---
+
+## 📂 Directory Structure
+
+```
+ScribeAI/
+├── AppDelegate.swift
+├── SceneDelegate.swift
+├── Models/
+│ ├── WhisperModel.mlmodel
+│ ├── WhisperModelManager.swift
+│ └── CoreDataStack.swift
+├── Views/
+│ ├── RecordingView.swift
+│ ├── TranscriptionView.swift
+│ ├── TranscriptionListView.swift
+│ └── SettingsView.swift
+├── ViewModels/
+│ ├── RecordingViewModel.swift
+│ ├── TranscriptionViewModel.swift
+│ └── SettingsViewModel.swift
+├── Managers/
+│ ├── LiveActivityManager.swift
+│ ├── AudioSessionManager.swift
+│ └── DynamicIslandController.swift
+├── Utilities/
+│ ├── ErrorAlertManager.swift
+│ ├── AudioProcessor.swift
+│ ├── Localizable.swift
+│ └── PerformanceMonitor.swift
+├── Widgets/
+│ └── TranscriptionWidget.swift
+├── ModelConversionScripts/
+│ └── convert_whisper_to_coreml.py
+├── Resources/
+│ ├── Assets.xcassets
+│ ├── Localizable.strings
+│ └── AppIcon.appiconset
+├── Tests/
+│ ├── ScribeAITests/
+│ └── ScribeAIUITests/
+├── Info.plist
+└── README.md
+```
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
