@@ -94,4 +94,23 @@ class WhisperModelManagerTests: XCTestCase {
             waitForExpectations(timeout: 10, handler: nil)
         }
     }
+
+    func testModelDownloadAndLoad() {
+        let expectation = self.expectation(description: "Model download and load")
+        
+        // Simulate model not present locally
+        deleteLocalModel()
+        
+        WhisperModelManager.shared.loadModel { result in
+            switch result {
+                case .success:
+                    XCTAssertNotNil(WhisperModelManager.shared.model)
+                case .failure(let error):
+                    XCTFail("Model failed to download and load: \(error)")
+            }
+            expectation.fulfill()
+        }
+        
+        waitForExpectations(timeout: 60, handler: nil)
+    }
 } 

@@ -26,20 +26,22 @@ class LiveActivityManager {
     }
     
     func updateRecordingProgress(duration: TimeInterval, transcription: String) async {
-        guard let activity = currentActivity else { return }
-        
+        guard let activity = currentActivity else {
+            print("No active Live Activity to update")
+            return
+        }
+
         let updatedState = RecordingAttributes.ContentState(
             isRecording: true,
             duration: duration,
             transcription: transcription
         )
-        
-        await activity.update(
-            ActivityContent(
-                state: updatedState,
-                staleDate: nil
-            )
-        )
+
+        do {
+            try await activity.update(using: updatedState)
+        } catch {
+            print("Error updating Live Activity: \(error.localizedDescription)")
+        }
     }
     
     func endRecording() async {

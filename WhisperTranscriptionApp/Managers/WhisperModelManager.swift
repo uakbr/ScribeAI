@@ -1,29 +1,70 @@
+import Foundation
+import CoreML
+
 class WhisperModelManager {
     static let shared = WhisperModelManager()
     private var model: WhisperModel?
     private let modelQueue = DispatchQueue(label: "com.app.whisper.model", qos: .userInitiated)
-    private let modelURL = Bundle.main.url(forResource: "WhisperModel", withExtension: "mlmodel")
-    
+
     private init() {
         loadModel()
     }
-    
+
     private func loadModel() {
-        guard let modelURL = modelURL else {
-            assertionFailure("WhisperModel.mlmodel not found in bundle")
-            return
-        }
-        
-        do {
-            let compiledModelURL = try MLModel.compileModel(at: modelURL)
-            let config = MLModelConfiguration()
-            config.computeUnits = .all // Use all available compute units
-            model = try WhisperModel(contentsOf: compiledModelURL, configuration: config)
-        } catch {
-            assertionFailure("Failed to load Whisper model: \(error)")
+        if let localModelURL = getLocalModelURL() {
+            loadModel(from: localModelURL)
+        } else {
+            downloadModel()
         }
     }
-    
+
+    private func getLocalModelURL() -> URL? {
+        // Check if the model is already saved locally
+        let fileManager = FileManager.default
+        let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let modelURL = documentDirectory.appendingPathComponent("WhisperModel.mlmodelc")
+        return fileManager.fileExists(atPath: modelURL.path) ? modelURL : nil
+    }
+
+    private func downloadModel() {
+        // Implement ODR download logic
+        let resourceRequest = NSBundleResourceRequest(tags: ["WhisperModel"])
+        resourceRequest.beginAccessingResources { [weak self] error in
+            if let error = error {
+                print("Error downloading model: \(error.localizedDescription)")
+                return
+            }
+            guard let modelURL = Bundle.main.url(forResource: "WhisperModel", withExtension: "mlmodelc") else {
+                print("Model not found in bundle after download")
+                return
+            }
+            self?.saveModelToDocuments(modelURL)
+        }
+    }
+
+    private func saveModelToDocuments(_ modelURL: URL) {
+        let fileManager = FileManager.default
+        let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let destinationURL = documentDirectory.appendingPathComponent("WhisperModel.mlmodelc")
+        do {
+            try fileManager.copyItem(at: modelURL, to: destinationURL)
+            loadModel()
+        } catch {
+            print("Error saving model to documents directory: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadModel(from url: URL) {
+        do {
+            let config = MLModelConfiguration()
+            config.allowLowPrecisionAccumulationOnGPU = true
+            config.computeUnits = .cpuAndGPU
+            model = try WhisperModel(contentsOf: url, configuration: config)
+        } catch {
+            print("Error loading model: \(error.localizedDescription)")
+        }
+    }
+
     func transcribe(audioBuffer: [Float], bufferSize: Int, completion: @escaping (Result<String, Error>) -> Void) {
         modelQueue.async { [weak self] in
             guard let model = self?.model else {

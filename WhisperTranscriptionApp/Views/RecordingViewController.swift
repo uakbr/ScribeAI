@@ -319,4 +319,22 @@ class RecordingViewController: UIViewController {
             self.view.layoutIfNeeded()
         }
     }
+
+    func startTranscription() {
+        showLoadingIndicator()
+        AudioTranscriber.shared.startTranscribing(
+            updateHandler: { [weak self] transcription in
+                DispatchQueue.main.async {
+                    self?.updateTranscriptionLabel(transcription)
+                    self?.hideLoadingIndicator()
+                }
+            },
+            errorHandler: { [weak self] error in
+                DispatchQueue.main.async {
+                    self?.hideLoadingIndicator()
+                    ErrorAlertManager.shared.handleError(error, domain: .transcription, in: self!)
+                }
+            }
+        )
+    }
 }

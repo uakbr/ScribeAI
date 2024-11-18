@@ -16,7 +16,7 @@ class AudioTranscriber: NSObject {
     private let transcriptionLock = NSLock()
     private var isTranscribing = false
     private let modelSampleRate: Double = 16000.0
-    private let processingInterval: TimeInterval = 5.0
+    private let processingInterval: TimeInterval = 10.0
     private let maxAudioLength: TimeInterval = 30.0
     
     private var transcriptionUpdateHandler: ((String) -> Void)?
@@ -28,6 +28,8 @@ class AudioTranscriber: NSObject {
     // Add buffer size limits and cleanup
     private let maxBufferSize = 1024 * 1024 // 1MB
     private var bufferCleanupTimer: Timer?
+    
+    private let maxBufferLength: Int = Int(16000 * 30) // 30 seconds of audio at 16kHz
     
     // MARK: - Initialization
     private override init() {
@@ -242,6 +244,27 @@ class AudioTranscriber: NSObject {
         bufferCleanupTimer?.invalidate()
         audioEngine?.stop()
         inputNode?.removeTap(onBus: 0)
+    }
+    
+    private func appendAudioData(_ data: [Float]) {
+        transcriptionQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.transcriptionBuffer.append(contentsOf: data)
+            if self.transcriptionBuffer.count > self.maxBufferLength {
+                // Remove oldest samples
+                self.transcriptionBuffer.removeFirst(self.transcriptionBuffer.count - self.maxBufferLength)
+            }
+        }
+    }
+    
+    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
+        guard let channelData = buffer.floatChannelData?[0] else { return }
+        let channelDataArray = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
+
+        // Resample if needed
+        let processedData = AudioProcessor.shared.process(buffer: channelDataArray, fromSampleRate: buffer.format.sampleRate)
+
+        appendAudioData(processedData)
     }
 }
 

@@ -98,6 +98,8 @@ enum AppError: LocalizedError {
     case transcriptionFailed(Error)
     case storageError(Error)
     case modelLoadingError(Error)
+    case modelDownloadFailed(Error)
+    case modelLoadFailed(Error)
     
     var errorDescription: String? {
         switch self {
@@ -111,6 +113,10 @@ enum AppError: LocalizedError {
             return "Storage operation failed: \(error.localizedDescription)"
         case .modelLoadingError(let error):
             return "Failed to load Whisper model: \(error.localizedDescription)"
+        case .modelDownloadFailed(let error):
+            return "Model download failed: \(error.localizedDescription)"
+        case .modelLoadFailed(let error):
+            return "Model loading failed: \(error.localizedDescription)"
         }
     }
 }
