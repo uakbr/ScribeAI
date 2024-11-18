@@ -1,9 +1,9 @@
 import UIKit
 import AVFoundation
-import ActivityKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    var currentBackgroundTaskID: UIBackgroundTaskIdentifier?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         do {
@@ -13,49 +13,56 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers]
             )
             try AVAudioSession.sharedInstance().setActive(true)
-            
+
             // Add background task handling
-            application.beginBackgroundTask { [weak self] in
-                self?.handleBackgroundTaskExpiration()
-            }
+            application.beginReceivingRemoteControlEvents()
+            setupNotifications()
         } catch {
             ErrorAlertManager.shared.handleAudioSessionError(error)
         }
         return true
     }
 
-    private func handleBackgroundTaskExpiration() {
-        // Clean up resources when background task expires
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruption(_:)),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
     }
 
-    // MARK: UISceneSession Lifecycle
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
+    @objc private func handleInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else { return }
 
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Handle discarded scenes if needed
-    }
-
-    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
-        // Handle background session events
+        switch type {
+        case .began:
+            // Pause or stop audio processing
+            AudioTranscriber.shared.pauseTranscribing()
+        case .ended:
+            // Optionally resume audio processing
+            do {
+                try AudioTranscriber.shared.resumeTranscribing()
+            } catch {
+                print("Failed to resume transcribing: \(error.localizedDescription)")
+            }
+        @unknown default:
+            break
+        }
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        let taskID = application.beginBackgroundTask { [weak self] in
+        currentBackgroundTaskID = application.beginBackgroundTask { [weak self] in
             self?.cleanupBackgroundTask()
         }
-        
-        if taskID == .invalid {
-            cleanupBackgroundTask()
-        } else {
-            currentBackgroundTaskID = taskID
-        }
     }
-    
+
     private func cleanupBackgroundTask() {
-        guard let taskID = currentBackgroundTaskID else { return }
-        UIApplication.shared.endBackgroundTask(taskID)
-        currentBackgroundTaskID = nil
+        if let taskID = currentBackgroundTaskID {
+            UIApplication.shared.endBackgroundTask(taskID)
+            currentBackgroundTaskID = nil
+        }
     }
 }

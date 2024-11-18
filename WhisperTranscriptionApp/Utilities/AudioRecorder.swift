@@ -1,3 +1,5 @@
+import AVFoundation
+
 class AudioRecorder {
     private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
@@ -14,7 +16,7 @@ class AudioRecorder {
         }
         
         let recordingFormat = inputNode.outputFormat(forBus: 0)
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, time in
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, _ in
             self?.processAudioBuffer(buffer)
         }
         
@@ -30,6 +32,17 @@ class AudioRecorder {
         inputNode?.removeTap(onBus: 0)
         audioEngine = nil
         inputNode = nil
+    }
+    
+    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
+        // Process the audio buffer using AudioProcessor
+        do {
+            let processedBuffer = try AudioProcessor.shared.processAudioBuffer(buffer)
+            // Pass the processed buffer to the transcriber
+            AudioTranscriber.shared.appendAudioData(processedBuffer)
+        } catch {
+            print("Audio processing error: \(error.localizedDescription)")
+        }
     }
     
     deinit {

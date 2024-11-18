@@ -2,16 +2,13 @@
     "NSPrivacyAccessedAPITypes": [
         {
             "NSPrivacyAccessedAPIType": "NSMicrophoneUsageDescription",
-            "NSPrivacyAccessedAPITypeReasons": ["Microphone access is required for audio recording and transcription"]
+            "NSPrivacyAccessedAPITypeReasons": ["Microphone access is required for audio recording and transcription."]
         },
         {
             "NSPrivacyAccessedAPIType": "NSSpeechRecognitionUsageDescription",
-            "NSPrivacyAccessedAPITypeReasons": ["Speech recognition is used to provide transcription capabilities"]
+            "NSPrivacyAccessedAPITypeReasons": ["Speech recognition is used to provide transcription capabilities."]
         }
     ],
     "NSPrivacyTracking": false,
-    "NSPrivacyTrackingDomains": [],
-    "Privacy - Microphone Usage Description": "Microphone access is required for audio recording and transcription.",
-    "Privacy - Speech Recognition Usage Description": "Speech recognition is used to provide transcription capabilities.",
-    "NSMotionUsageDescription": "Motion data is used to improve audio processing."
+    "NSPrivacyTrackingDomains": []
 } 

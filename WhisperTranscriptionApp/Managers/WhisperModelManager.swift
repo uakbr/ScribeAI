@@ -5,33 +5,32 @@ class WhisperModelManager {
     static let shared = WhisperModelManager()
     private var model: WhisperModel?
     private let modelQueue = DispatchQueue(label: "com.app.whisper.model", qos: .userInitiated)
-
-    private init() {
-        loadModel()
-    }
-
-    private func loadModel() {
-        if let localModelURL = getLocalModelURL() {
-            loadModel(from: localModelURL)
-        } else {
-            downloadModel()
-        }
-    }
-
-    private func getLocalModelURL() -> URL? {
-        // Check if the model is already saved locally
+    private let modelDownloadTag = "WhisperModel"
+    private var modelURL: URL? {
         let fileManager = FileManager.default
         let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let modelURL = documentDirectory.appendingPathComponent("WhisperModel.mlmodelc")
         return fileManager.fileExists(atPath: modelURL.path) ? modelURL : nil
     }
 
+    private init() {
+        loadModel()
+    }
+
+    private func loadModel() {
+        if let localModelURL = modelURL {
+            loadModel(from: localModelURL)
+        } else {
+            downloadModel()
+        }
+    }
+
     private func downloadModel() {
-        // Implement ODR download logic
-        let resourceRequest = NSBundleResourceRequest(tags: ["WhisperModel"])
+        let resourceRequest = NSBundleResourceRequest(tags: [modelDownloadTag])
         resourceRequest.beginAccessingResources { [weak self] error in
             if let error = error {
                 print("Error downloading model: \(error.localizedDescription)")
+                // Handle download error
                 return
             }
             guard let modelURL = Bundle.main.url(forResource: "WhisperModel", withExtension: "mlmodelc") else {
@@ -47,6 +46,9 @@ class WhisperModelManager {
         let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
         let destinationURL = documentDirectory.appendingPathComponent("WhisperModel.mlmodelc")
         do {
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try fileManager.removeItem(at: destinationURL)
+            }
             try fileManager.copyItem(at: modelURL, to: destinationURL)
             loadModel()
         } catch {
@@ -54,34 +56,33 @@ class WhisperModelManager {
         }
     }
 
-    private func loadModel(from url: URL, completion: @escaping (Bool) -> Void) {
+    private func loadModel(from url: URL) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             do {
                 let config = MLModelConfiguration()
                 config.computeUnits = .all
                 let loadedModel = try WhisperModel(contentsOf: url, configuration: config)
                 self?.model = loadedModel
-                completion(true)
+                print("Whisper model loaded successfully.")
             } catch {
                 print("Error loading model: \(error.localizedDescription)")
-                completion(false)
+                // Handle model loading error
             }
         }
     }
 
-    func transcribe(audioBuffer: [Float], bufferSize: Int, completion: @escaping (Result<String, Error>) -> Void) {
+    func transcribe(audioBuffer: [Float], completion: @escaping (Result<String, Error>) -> Void) {
         modelQueue.async { [weak self] in
             guard let model = self?.model else {
                 completion(.failure(WhisperError.modelNotLoaded))
                 return
             }
-            
-            // Ensure audio buffer meets model requirements
+
             guard audioBuffer.count >= 480000 else { // Minimum 30 seconds at 16kHz
                 completion(.failure(WhisperError.insufficientAudioData))
                 return
             }
-            
+
             do {
                 let input = WhisperModelInput(audioInput: audioBuffer)
                 let output = try model.prediction(input: input)
@@ -91,18 +92,18 @@ class WhisperModelManager {
             }
         }
     }
-    
+
     enum WhisperError: LocalizedError {
         case modelNotLoaded
         case insufficientAudioData
         case predictionFailed(Error)
-        
+
         var errorDescription: String? {
             switch self {
             case .modelNotLoaded:
-                return "Whisper model failed to load"
+                return "Whisper model failed to load."
             case .insufficientAudioData:
-                return "Audio buffer too short for transcription"
+                return "Audio buffer too short for transcription."
             case .predictionFailed(let error):
                 return "Model prediction failed: \(error.localizedDescription)"
             }
