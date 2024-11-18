@@ -24,4 +24,19 @@ enum L10n {
             comment: "Error message when transcription fails"
         )
     }
+    
+    enum Transcription {
+        static let share = NSLocalizedString(
+            "transcription.share",
+            comment: "Button title to share transcription"
+        )
+        static let copy = NSLocalizedString(
+            "transcription.copy",
+            comment: "Button title to copy transcription"
+        )
+        static let delete = NSLocalizedString(
+            "transcription.delete",
+            comment: "Button title to delete transcription"
+        )
+    }
 } 

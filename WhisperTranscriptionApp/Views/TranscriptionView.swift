@@ -1,34 +1,50 @@
 import SwiftUI
 
 struct TranscriptionView: View {
-    @StateObject private var viewModel: TranscriptionViewModel
-    @Environment(\.sizeCategory) var sizeCategory
+    @ObservedObject var viewModel: TranscriptionViewModel
     
     var body: some View {
         VStack(spacing: 16) {
-            Text(viewModel.transcriptionText)
-                .font(.body)
-                .dynamicTypeSize(...(.accessibility5))
-                .accessibilityLabel("Transcription text")
-                .accessibilityValue(viewModel.transcriptionText)
+            ScrollView {
+                Text(viewModel.transcriptionText)
+                    .font(.body)
+                    .padding()
+                    .accessibilityLabel("Transcription text")
+                    .accessibilityValue(viewModel.transcriptionText)
+            }
+            .background(Color(UIColor.secondarySystemBackground))
+            .cornerRadius(8)
+            .padding()
             
             if viewModel.isLoading {
                 ProgressView()
                     .accessibilityLabel("Loading transcription")
             }
             
-            HStack {
+            HStack(spacing: 20) {
                 Button(action: viewModel.shareTranscription) {
-                    Label("Share", systemImage: "square.and.arrow.up")
+                    Label(L10n.Transcription.share, systemImage: "square.and.arrow.up")
                 }
-                .accessibilityHint("Share this transcription")
+                .accessibilityHint("Shares the transcription")
                 
                 Button(action: viewModel.copyToClipboard) {
-                    Label("Copy", systemImage: "doc.on.doc")
+                    Label(L10n.Transcription.copy, systemImage: "doc.on.doc")
                 }
-                .accessibilityHint("Copy transcription to clipboard")
+                .accessibilityHint("Copies the transcription to clipboard")
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
+        }
+        .navigationTitle("Transcription")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: viewModel.deleteTranscription) {
+                    Image(systemName: "trash")
+                }
+                .accessibilityLabel(L10n.Transcription.delete)
+                .accessibilityHint("Deletes this transcription")
             }
         }
-        .padding()
     }
 } 

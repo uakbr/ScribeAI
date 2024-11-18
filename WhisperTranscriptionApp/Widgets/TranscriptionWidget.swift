@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 
+@main
 struct TranscriptionWidget: Widget {
     private let kind = "TranscriptionWidget"
     
@@ -12,8 +13,28 @@ struct TranscriptionWidget: Widget {
             TranscriptionWidgetView(entry: entry)
         }
         .configurationDisplayName("Recent Transcriptions")
-        .description("Shows your most recent transcriptions")
+        .description("Shows your most recent transcriptions.")
         .supportedFamilies([.systemSmall, .systemMedium])
+    }
+}
+
+struct TranscriptionEntry: TimelineEntry {
+    let date: Date
+    let transcriptions: [TranscriptionRecord]
+}
+
+struct TranscriptionWidgetView: View {
+    var entry: TranscriptionEntry
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(entry.transcriptions.prefix(3), id: \.id) { transcription in
+                Text(transcription.text ?? "No Transcription")
+                    .font(.body)
+                    .lineLimit(1)
+            }
+        }
+        .padding()
     }
 }
 
@@ -38,7 +59,7 @@ struct TranscriptionTimelineProvider: TimelineProvider {
             )
         ]
         
-        let timeline = Timeline(entries: entries, policy: .atEnd)
+        let timeline = Timeline(entries: entries, policy: .after(Date().addingTimeInterval(3600)))
         completion(timeline)
     }
 } 

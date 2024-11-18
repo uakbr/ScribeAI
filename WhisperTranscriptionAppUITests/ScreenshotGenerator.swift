@@ -5,28 +5,36 @@ class ScreenshotGenerator: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        setupSnapshot(app)
         app = XCUIApplication()
+        setupSnapshot(app)
         app.launchArguments += ["--uitesting"]
+        app.launch()
     }
     
-    func testGenerateScreenshots() throws {
-        app.launch()
-        
+    func testGenerateScreenshots() {
         // Home screen
-        snapshot("01_Home")
+        snapshot("01_HomeScreen")
         
-        // Recording screen
-        app.buttons["Start Recording"].tap()
+        // Start Recording
+        let recordButton = app.buttons["StartRecordingButton"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 5))
+        recordButton.tap()
+        sleep(5) // Simulate recording time
         snapshot("02_Recording")
         
-        // Transcription list
-        app.buttons["Stop Recording"].tap()
-        snapshot("03_TranscriptionList")
+        // Stop Recording
+        let stopButton = app.buttons["StopRecordingButton"]
+        XCTAssertTrue(stopButton.waitForExistence(timeout: 5))
+        stopButton.tap()
+        snapshot("03_TranscriptionView")
+        
+        // Transcription List
+        app.tabBars.buttons["Transcriptions"].tap()
+        snapshot("04_TranscriptionList")
         
         // Settings screen
-        app.buttons["Settings"].tap()
-        snapshot("04_Settings")
+        app.tabBars.buttons["Settings"].tap()
+        snapshot("05_Settings")
     }
     
     private func snapshot(_ name: String) {
