@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/username/ScribeAI">
+  <a href="https://github.com/uakbr/ScribeAI">
     <img src="Assets/logo.png" alt="ScribeAI Logo" width="300" style="max-width: 100%;">
   </a>
 </div>
