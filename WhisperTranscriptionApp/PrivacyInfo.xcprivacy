@@ -1,0 +1,14 @@
+{
+    "NSPrivacyAccessedAPITypes": [
+        {
+            "NSPrivacyAccessedAPIType": "NSMicrophoneUsageDescription",
+            "NSPrivacyAccessedAPITypeReasons": ["Microphone access is required for audio recording and transcription"]
+        },
+        {
+            "NSPrivacyAccessedAPIType": "NSSpeechRecognitionUsageDescription",
+            "NSPrivacyAccessedAPITypeReasons": ["Speech recognition is used to provide transcription capabilities"]
+        }
+    ],
+    "NSPrivacyTracking": false,
+    "NSPrivacyTrackingDomains": []
+} 
