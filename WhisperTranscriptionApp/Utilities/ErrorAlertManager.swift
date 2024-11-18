@@ -40,3 +40,49 @@ class ErrorAlertManager {
         showAlert(title: "Storage Error", message: error.localizedDescription, in: viewController)
     }
 }
+
+enum TranscriptionError: LocalizedError {
+    case microphonePermissionDenied
+    case modelLoadingFailed
+    case transcriptionFailed(String)
+    case audioRecordingFailed(String)
+    case storageError(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .microphonePermissionDenied:
+            return "Microphone access is required for recording. Please enable it in Settings."
+        case .modelLoadingFailed:
+            return "Failed to load the Whisper model. Please try reinstalling the app."
+        case .transcriptionFailed(let message):
+            return "Transcription failed: \(message)"
+        case .audioRecordingFailed(let message):
+            return "Recording failed: \(message)"
+        case .storageError(let message):
+            return "Storage error: \(message)"
+        }
+    }
+}
+
+enum AppError: LocalizedError {
+    case audioSessionSetupFailed(Error)
+    case recordingFailed(Error)
+    case transcriptionFailed(Error)
+    case storageError(Error)
+    case modelLoadingError(Error)
+    
+    var errorDescription: String? {
+        switch self {
+        case .audioSessionSetupFailed(let error):
+            return "Failed to setup audio session: \(error.localizedDescription)"
+        case .recordingFailed(let error):
+            return "Recording failed: \(error.localizedDescription)"
+        case .transcriptionFailed(let error):
+            return "Transcription failed: \(error.localizedDescription)"
+        case .storageError(let error):
+            return "Storage operation failed: \(error.localizedDescription)"
+        case .modelLoadingError(let error):
+            return "Failed to load Whisper model: \(error.localizedDescription)"
+        }
+    }
+}

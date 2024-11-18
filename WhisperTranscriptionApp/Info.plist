@@ -4,6 +4,8 @@
 <dict>
     <key>NSMicrophoneUsageDescription</key>
     <string>Microphone access is required for audio recording and transcription.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Speech recognition is used to provide transcription capabilities.</string>
     <key>UIBackgroundModes</key>
     <array>
         <string>audio</string>

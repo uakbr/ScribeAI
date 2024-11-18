@@ -6,52 +6,26 @@ import ActivityKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Configure audio session for recording
         do {
-            let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .defaultToSpeaker])
-            try audioSession.setActive(true)
+            try AVAudioSession.sharedInstance().setCategory(
+                .playAndRecord,
+                mode: .default,
+                options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP, .mixWithOthers]
+            )
+            try AVAudioSession.sharedInstance().setActive(true)
             
-            // Request microphone permission
-            audioSession.requestRecordPermission { allowed in
-                if !allowed {
-                    // Handle permission denial through ErrorAlertManager
-                    DispatchQueue.main.async {
-                        ErrorAlertManager.shared.handleMicrophonePermissionError()
-                    }
-                }
+            // Add background task handling
+            application.beginBackgroundTask { [weak self] in
+                self?.handleBackgroundTaskExpiration()
             }
         } catch {
-            DispatchQueue.main.async {
-                ErrorAlertManager.shared.showAlert(
-                    title: "Audio Session Error",
-                    message: "Failed to configure audio session: \(error.localizedDescription)"
-                )
-            }
+            ErrorAlertManager.shared.handleAudioSessionError(error)
         }
-        
-        // Prevent device from sleeping during recording
-        UIApplication.shared.isIdleTimerDisabled = true
-        
-        // Request authorization for Live Activities
-        ActivityAuthorizationInfo().requestAuthorization { granted, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    ErrorAlertManager.shared.showAlert(
-                        title: "Live Activities Error",
-                        message: error.localizedDescription
-                    )
-                } else if !granted {
-                    ErrorAlertManager.shared.showAlert(
-                        title: "Live Activities Not Authorized",
-                        message: "Please enable Live Activities in Settings to use this feature."
-                    )
-                    // Optionally, adjust UI to reflect lack of Live Activities
-                }
-            }
-        }
-        
         return true
+    }
+
+    private func handleBackgroundTaskExpiration() {
+        // Clean up resources when background task expires
     }
 
     // MARK: UISceneSession Lifecycle
@@ -61,5 +35,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         // Handle discarded scenes if needed
+    }
+
+    func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
+        // Handle background session events
     }
 }

@@ -53,6 +53,14 @@ class RecordingViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupActions()
+        
+        startRecordingButton.accessibilityIdentifier = "StartRecordingButton"
+        stopRecordingButton.accessibilityIdentifier = "StopRecordingButton"
+        transcriptionTextView.accessibilityIdentifier = "TranscriptionTextView"
+        
+        // Add voice over support
+        startRecordingButton.accessibilityLabel = "Start Recording"
+        startRecordingButton.accessibilityHint = "Double tap to start recording audio"
     }
 
     // MARK: - UI Setup

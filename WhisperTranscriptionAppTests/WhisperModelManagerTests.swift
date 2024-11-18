@@ -85,4 +85,13 @@ class WhisperModelManagerTests: XCTestCase {
         }
         waitForExpectations(timeout: 5, handler: nil)
     }
+
+    func testModelPerformance() {
+        measure {
+            // Test transcription performance
+            let expectation = self.expectation(description: "Transcription completes")
+            // ... test implementation
+            waitForExpectations(timeout: 10, handler: nil)
+        }
+    }
 } 

@@ -3,48 +3,39 @@ import ActivityKit
 
 class LiveActivityManager {
     static let shared = LiveActivityManager()
+    private var currentActivity: Activity<RecordingAttributes>?
     
-    private var activity: Activity<RecordingAttributes>?
-    
-    private init() {}
-    
-    // Start the Live Activity
-    func startLiveActivity(sessionName: String) {
-        let initialContentState = RecordingAttributes.ContentState(
-            elapsedTime: 0,
-            transcriptionProgress: "Starting transcription..."
+    func startRecordingActivity() async throws {
+        let attributes = RecordingAttributes()
+        let contentState = RecordingAttributes.ContentState(
+            isRecording: true,
+            duration: 0,
+            transcription: ""
         )
-        
-        let attributes = RecordingAttributes(sessionName: sessionName)
         
         do {
-            activity = try Activity<RecordingAttributes>.request(
+            let activity = try await Activity.request(
                 attributes: attributes,
-                contentState: initialContentState,
+                contentState: contentState,
                 pushType: nil
             )
+            currentActivity = activity
         } catch {
-            print("Error starting Live Activity: \(error.localizedDescription)")
+            throw LiveActivityError.activityRequestFailed(error)
         }
     }
     
-    // Update the Live Activity
-    func updateLiveActivity(elapsedTime: TimeInterval, transcriptionProgress: String) {
-        let updatedContentState = RecordingAttributes.ContentState(
-            elapsedTime: elapsedTime,
-            transcriptionProgress: transcriptionProgress
-        )
+    enum LiveActivityError: LocalizedError {
+        case activityRequestFailed(Error)
+        case noActiveRecording
         
-        Task {
-            await activity?.update(using: updatedContentState)
-        }
-    }
-    
-    // End the Live Activity
-    func endLiveActivity() {
-        Task {
-            await activity?.end(dismissalPolicy: .immediate)
-            activity = nil
+        var errorDescription: String? {
+            switch self {
+            case .activityRequestFailed(let error):
+                return "Failed to start recording activity: \(error.localizedDescription)"
+            case .noActiveRecording:
+                return "No active recording found"
+            }
         }
     }
 } 
