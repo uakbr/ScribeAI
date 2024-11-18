@@ -54,14 +54,18 @@ class WhisperModelManager {
         }
     }
 
-    private func loadModel(from url: URL) {
-        do {
-            let config = MLModelConfiguration()
-            config.allowLowPrecisionAccumulationOnGPU = true
-            config.computeUnits = .cpuAndGPU
-            model = try WhisperModel(contentsOf: url, configuration: config)
-        } catch {
-            print("Error loading model: \(error.localizedDescription)")
+    private func loadModel(from url: URL, completion: @escaping (Bool) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            do {
+                let config = MLModelConfiguration()
+                config.computeUnits = .all
+                let loadedModel = try WhisperModel(contentsOf: url, configuration: config)
+                self?.model = loadedModel
+                completion(true)
+            } catch {
+                print("Error loading model: \(error.localizedDescription)")
+                completion(false)
+            }
         }
     }
 

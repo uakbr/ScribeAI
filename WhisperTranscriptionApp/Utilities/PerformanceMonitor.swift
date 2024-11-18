@@ -21,6 +21,8 @@ class PerformanceMonitor {
 
 private class MetricsStore {
     var measurements: [String: [TimeInterval]] = [:]
+    private var startTimes: [String: Date] = [:]
+    
     var averages: [String: TimeInterval] {
         measurements.mapValues { times in
             times.reduce(0, +) / Double(times.count)
@@ -28,12 +30,13 @@ private class MetricsStore {
     }
     
     func start(name: String) {
-        if measurements[name] == nil {
-            measurements[name] = []
-        }
+        startTimes[name] = Date()
     }
     
     func end(name: String) {
-        // Calculate and store duration
+        guard let startTime = startTimes[name] else { return }
+        let duration = Date().timeIntervalSince(startTime)
+        measurements[name, default: []].append(duration)
+        startTimes.removeValue(forKey: name)
     }
 } 

@@ -20,12 +20,18 @@ extension TranscriptionRecord {
         }
     }
     
-    static func create(in context: NSManagedObjectContext) -> TranscriptionRecord {
-        context.performAndWait {
+    static func create(in context: NSManagedObjectContext, completion: @escaping (TranscriptionRecord?) -> Void) {
+        context.perform {
             let record = TranscriptionRecord(context: context)
             record.id = UUID()
             record.date = Date()
-            return record
+            do {
+                try context.save()
+                completion(record)
+            } catch {
+                print("Failed to save new transcription record: \(error)")
+                completion(nil)
+            }
         }
     }
     
@@ -44,6 +50,21 @@ extension TranscriptionRecord {
         context.perform {
             context.delete(record)
             try? context.save()
+        }
+    }
+    
+    static func fetchAll(in context: NSManagedObjectContext, completion: @escaping ([TranscriptionRecord]) -> Void) {
+        context.perform {
+            let request: NSFetchRequest<TranscriptionRecord> = TranscriptionRecord.fetchRequest()
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \TranscriptionRecord.date, ascending: false)]
+            
+            do {
+                let records = try context.fetch(request)
+                completion(records)
+            } catch {
+                print("Failed to fetch transcription records: \(error)")
+                completion([])
+            }
         }
     }
 } 

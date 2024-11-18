@@ -4,18 +4,52 @@ class AudioRecorder {
     
     func startRecording() throws {
         audioEngine = AVAudioEngine()
-        inputNode = audioEngine?.inputNode
+        guard let audioEngine = audioEngine else {
+            throw AudioRecorderError.engineInitializationFailed
+        }
         
-        let recordingFormat = inputNode?.outputFormat(forBus: 0)
-        inputNode?.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, time in
+        inputNode = audioEngine.inputNode
+        guard let inputNode = inputNode else {
+            throw AudioRecorderError.inputNodeUnavailable
+        }
+        
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { [weak self] buffer, time in
             self?.processAudioBuffer(buffer)
         }
         
-        try audioEngine?.start()
+        do {
+            try audioEngine.start()
+        } catch {
+            throw AudioRecorderError.audioEngineStartFailed(error)
+        }
+    }
+    
+    func stopRecording() {
+        audioEngine?.stop()
+        inputNode?.removeTap(onBus: 0)
+        audioEngine = nil
+        inputNode = nil
     }
     
     deinit {
-        audioEngine?.stop()
-        inputNode?.removeTap(onBus: 0)
+        stopRecording()
+    }
+}
+
+enum AudioRecorderError: LocalizedError {
+    case engineInitializationFailed
+    case inputNodeUnavailable
+    case audioEngineStartFailed(Error)
+    
+    var errorDescription: String? {
+        switch self {
+        case .engineInitializationFailed:
+            return "Failed to initialize audio engine."
+        case .inputNodeUnavailable:
+            return "Audio input node is unavailable."
+        case .audioEngineStartFailed(let error):
+            return "Failed to start audio engine: \(error.localizedDescription)"
+        }
     }
 } 
