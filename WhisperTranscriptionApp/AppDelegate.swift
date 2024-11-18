@@ -40,4 +40,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         // Handle background session events
     }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        let taskID = application.beginBackgroundTask { [weak self] in
+            self?.cleanupBackgroundTask()
+        }
+        
+        if taskID == .invalid {
+            cleanupBackgroundTask()
+        } else {
+            currentBackgroundTaskID = taskID
+        }
+    }
+    
+    private func cleanupBackgroundTask() {
+        guard let taskID = currentBackgroundTaskID else { return }
+        UIApplication.shared.endBackgroundTask(taskID)
+        currentBackgroundTaskID = nil
+    }
 }

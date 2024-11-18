@@ -28,4 +28,22 @@ extension TranscriptionRecord {
             return record
         }
     }
+    
+    static func saveContext(_ context: NSManagedObjectContext) {
+        guard context.hasChanges else { return }
+        
+        do {
+            try context.save()
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved Core Data error \(nserror), \(nserror.userInfo)")
+        }
+    }
+    
+    static func delete(_ record: TranscriptionRecord, from context: NSManagedObjectContext) {
+        context.perform {
+            context.delete(record)
+            try? context.save()
+        }
+    }
 } 

@@ -1,4 +1,5 @@
 import UIKit
+import os.log
 
 class ErrorAlertManager {
     static let shared = ErrorAlertManager()
@@ -38,6 +39,33 @@ class ErrorAlertManager {
     
     func handleStorageError(_ error: Error, in viewController: UIViewController) {
         showAlert(title: "Storage Error", message: error.localizedDescription, in: viewController)
+    }
+    
+    enum ErrorDomain: String {
+        case audio = "Audio"
+        case transcription = "Transcription"
+        case storage = "Storage"
+        case network = "Network"
+    }
+    
+    func logError(_ error: Error, domain: ErrorDomain) {
+        let errorLog = """
+        Domain: \(domain.rawValue)
+        Error: \(error.localizedDescription)
+        Date: \(Date())
+        """
+        
+        // Log error for analytics
+        os_log(.error, "%{public}@", errorLog)
+    }
+    
+    func handleError(_ error: Error, domain: ErrorDomain, in viewController: UIViewController) {
+        logError(error, domain: domain)
+        showAlert(
+            title: "\(domain.rawValue) Error",
+            message: error.localizedDescription,
+            in: viewController
+        )
     }
 }
 

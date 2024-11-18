@@ -25,6 +25,40 @@ class LiveActivityManager {
         }
     }
     
+    func updateRecordingProgress(duration: TimeInterval, transcription: String) async {
+        guard let activity = currentActivity else { return }
+        
+        let updatedState = RecordingAttributes.ContentState(
+            isRecording: true,
+            duration: duration,
+            transcription: transcription
+        )
+        
+        await activity.update(
+            ActivityContent(
+                state: updatedState,
+                staleDate: nil
+            )
+        )
+    }
+    
+    func endRecording() async {
+        guard let activity = currentActivity else { return }
+        
+        let finalState = RecordingAttributes.ContentState(
+            isRecording: false,
+            duration: 0,
+            transcription: ""
+        )
+        
+        await activity.end(
+            ActivityContent(state: finalState, staleDate: nil),
+            dismissalPolicy: .immediate
+        )
+        
+        currentActivity = nil
+    }
+    
     enum LiveActivityError: LocalizedError {
         case activityRequestFailed(Error)
         case noActiveRecording

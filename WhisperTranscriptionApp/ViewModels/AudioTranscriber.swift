@@ -25,6 +25,10 @@ class AudioTranscriber: NSObject {
     
     private var backgroundTaskID: UIBackgroundTaskIdentifier = .invalid
     
+    // Add buffer size limits and cleanup
+    private let maxBufferSize = 1024 * 1024 // 1MB
+    private var bufferCleanupTimer: Timer?
+    
     // MARK: - Initialization
     private override init() {
         super.init()
@@ -114,6 +118,11 @@ class AudioTranscriber: NSObject {
         
         startBackgroundTask()
         startProcessingTimer()
+        
+        // Add buffer cleanup timer
+        bufferCleanupTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] _ in
+            self?.cleanupOldBuffers()
+        }
     }
     
     func stopTranscribing() {
@@ -218,6 +227,21 @@ class AudioTranscriber: NSObject {
         transcriptionLock.lock()
         defer { transcriptionLock.unlock() }
         return isTranscribing
+    }
+    
+    private func cleanupOldBuffers() {
+        transcriptionLock.lock()
+        defer { transcriptionLock.unlock() }
+        
+        if transcriptionBuffer.count > maxBufferSize {
+            transcriptionBuffer.removeFirst(transcriptionBuffer.count - maxBufferSize)
+        }
+    }
+    
+    deinit {
+        bufferCleanupTimer?.invalidate()
+        audioEngine?.stop()
+        inputNode?.removeTap(onBus: 0)
     }
 }
 
