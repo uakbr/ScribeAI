@@ -47,6 +47,8 @@ class RecordingViewController: UIViewController {
     private let audioRecorder = AudioRecorder.shared
     private let audioTranscriber = AudioTranscriber.shared
     private var currentTranscription: String = ""
+    private var isRecording = false
+    private var isPaused = false
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -61,6 +63,14 @@ class RecordingViewController: UIViewController {
         // Add voice over support
         startRecordingButton.accessibilityLabel = "Start Recording"
         startRecordingButton.accessibilityHint = "Double tap to start recording audio"
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if isRecording {
+            stopRecording()
+        }
+        DynamicIslandController.shared.endDynamicIsland()
     }
 
     // MARK: - UI Setup
@@ -287,5 +297,26 @@ class RecordingViewController: UIViewController {
     // MARK: - Deinitialization
     deinit {
         timer?.invalidate()
+    }
+
+    private func setupAccessibility() {
+        recordButton.accessibilityIdentifier = "StartRecordingButton"
+        recordButton.accessibilityLabel = "Start Recording"
+        recordButton.accessibilityHint = "Double tap to start recording audio"
+        
+        transcriptionLabel.accessibilityIdentifier = "TranscriptionLabel"
+        transcriptionLabel.isAccessibilityElement = true
+        transcriptionLabel.accessibilityLabel = "Transcription Output"
+    }
+
+    private func updateUIState(isRecording: Bool) {
+        self.isRecording = isRecording
+        recordButton.isHidden = isRecording
+        pauseButton.isHidden = !isRecording
+        stopButton.isHidden = !isRecording
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }
