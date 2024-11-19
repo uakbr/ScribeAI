@@ -104,7 +104,7 @@ _Note: coming soon._
 - **Xcode 15** or later installed on your Mac.
 - **Swift**: Latest stable version compatible with iOS 17+.
 - **Whisper Model**: Pre-converted to Core ML format using the provided Python script.
-- **CocoaPods** or **Swift Package Manager** (if using external dependencies).
+- **Swift Package Manager** (for handling dependencies).
 
 ### Steps
 
@@ -118,37 +118,33 @@ _Note: coming soon._
    cd ScribeAI
    ```
 
-3. **Install Dependencies** (if any):
+3. **Open the Project in Xcode**:
 
-   - **Using CocoaPods**:
-     ```bash
-     pod install
-     open ScribeAI.xcworkspace
-     ```
+   - Open `ScribeAI.xcodeproj` in Xcode.
 
-   - **Using Swift Package Manager**:
+4. **Resolve Swift Package Dependencies**:
 
-     Open `ScribeAI.xcodeproj` and resolve packages.
+   - Xcode should automatically resolve SPM dependencies when you open the project.
+   - If not, go to **File > Packages > Resolve Package Versions** in Xcode.
 
-4. **Obtain the Whisper Core ML Model**:
+5. **Obtain the Whisper Core ML Model**:
 
    - Use the provided Python script `ModelConversionScripts/convert_whisper_to_coreml.py` to convert the Whisper model to Core ML format.
    - Place the converted `WhisperModel.mlmodel` into the `Models/` directory.
 
-5. **Update Project Settings**:
+6. **Update Project Settings**:
 
-   - Open the project in Xcode.
-   - Set the **Team** under **Signing & Capabilities**.
+   - Set the **Team** under **Signing & Capabilities** in Xcode.
    - Ensure that **Background Modes**, **App Groups**, and other necessary capabilities are enabled.
 
-6. **Configure Permissions**:
+7. **Configure Permissions**:
 
    - Enable necessary permissions under `Info.plist`:
      - `NSMicrophoneUsageDescription`
      - `NSSpeechRecognitionUsageDescription`
      - `NSSupportsLiveActivities`
 
-7. **Build and Run**:
+8. **Build and Run**:
 
    - Select your target device or simulator (iOS 17+).
    - Press **Cmd+R** to build and run the app.
