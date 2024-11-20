@@ -150,27 +150,14 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
     
     // MARK: - Button Actions
     @objc private func signInTapped() {
-        view.endEditing(true)
-        guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty else {
-            ErrorAlertManager.shared.showAlert(
-                title: "Missing Information",
-                message: "Please enter both email and password.",
-                in: self
-            )
-            return
-        }
-        
-        activityIndicator.startAnimating()
-        
-        SupabaseManager.shared.client.auth.signIn(email: email, password: password) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                
-                switch result {
-                case .success(_):
-                    self?.presentMainInterface()
-                case .failure(let error):
+        Task {
+            do {
+                let session = try await SupabaseManager.shared.signIn(email: email, password: password)
+                DispatchQueue.main.async {
+                    self.presentMainInterface()
+                }
+            } catch {
+                DispatchQueue.main.async {
                     ErrorAlertManager.shared.showAlert(
                         title: "Login Error",
                         message: error.localizedDescription,
