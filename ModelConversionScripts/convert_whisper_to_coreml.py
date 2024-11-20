@@ -1,30 +1,26 @@
-import torch
-import whisper
 import coremltools as ct
+import torch
+from transformers import WhisperForConditionalGeneration
 
-def convert_whisper_to_coreml():
-    # Load the pre-trained Whisper model
-    model = whisper.load_model("base")
+# Load the pre-trained Whisper model
+model = WhisperForConditionalGeneration.from_pretrained("openai/whisper-small")
+model.eval()
 
-    # Prepare a dummy input for tracing
-    audio_input = torch.zeros(1, 80, 3000)  # Adjust dimensions as needed
+# Trace the model with sample input
+sample_input = {'input_features': torch.zeros(1, 80, 3000)}
+traced_model = torch.jit.trace(model, sample_input)
 
-    # Trace the model
-    traced_model = torch.jit.trace(model, audio_input)
+# Convert to Core ML model
+mlmodel = ct.convert(
+    traced_model,
+    inputs=[ct.TensorType(shape=sample_input['input_features'].shape)],
+    minimum_deployment_target=ct.target.iOS17,
+)
 
-    # Convert to Core ML format
-    mlmodel = ct.convert(
-        traced_model,
-        inputs=[ct.TensorType(name="audio_input", shape=audio_input.shape)],
-        compute_units=ct.ComputeUnit.ALL,
-        convert_to="mlprogram",
-        minimum_deployment_target=ct.target.iOS17,
-    )
+# Save the Core ML model
+mlmodel.save("WhisperModel.mlmodel")
 
-    # Save the model
-    mlmodel.save("WhisperModel.mlpackage")
-
-    print("Conversion to Core ML format completed successfully.")
-
-if __name__ == "__main__":
-    convert_whisper_to_coreml() 
+# Compile the model to .mlmodelc format
+import coremltools
+compiled_model_path = coremltools.utils._compile_coremltool("WhisperModel.mlmodel")
+print(f"Compiled model saved at {compiled_model_path}") 

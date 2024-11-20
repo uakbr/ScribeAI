@@ -35,6 +35,7 @@
 			membershipExceptions = (
 				Info.plist,
 				Managers/WhisperModelManager.swift,
+				Models/WhisperModel.mlmodel,
 				Models/WhisperTokenizer.swift,
 				Utilities/AudioRecorder.swift,
 			);

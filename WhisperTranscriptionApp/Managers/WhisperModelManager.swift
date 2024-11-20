@@ -18,42 +18,98 @@ class WhisperModelManager {
     }
 
     private func loadModel() {
-        if let localModelURL = modelURL {
-            loadModel(from: localModelURL)
-        } else {
-            downloadModel()
+        // Check if the model is already compiled in the cache directory
+        if let compiledModelURL = getCompiledModelURL() {
+            print("Loading compiled model from \(compiledModelURL.path)")
+            loadModel(from: compiledModelURL)
+            return
+        }
+        
+        // Use NSBundleResourceRequest to download the model
+        let resourceRequest = NSBundleResourceRequest(tags: ["WhisperModel"])
+        resourceRequest.beginAccessingResources { [weak self] error in
+            if let error = error {
+                print("Failed to download model with error: \(error.localizedDescription)")
+                // Handle error
+                return
+            }
+            
+            // After downloading, get the model URL
+            guard let modelURL = Bundle.main.url(forResource: "WhisperModel", withExtension: "mlmodel") else {
+                print("Model not found in bundle after download")
+                return
+            }
+            
+            do {
+                // Compile the model
+                let compiledURL = try MLModel.compileModel(at: modelURL)
+                print("Model compiled at \(compiledURL.path)")
+                self?.saveCompiledModelURL(compiledURL)
+                self?.loadModel(from: compiledURL)
+            } catch {
+                print("Error compiling model: \(error.localizedDescription)")
+                // Handle error
+            }
+        }
+    }
+
+    // Helper to get the compiled model URL from cache
+    private func getCompiledModelURL() -> URL? {
+        let compiledModelPath = NSTemporaryDirectory().appending("WhisperModel.mlmodelc")
+        let compiledModelURL = URL(fileURLWithPath: compiledModelPath)
+        if FileManager.default.fileExists(atPath: compiledModelURL.path) {
+            return compiledModelURL
+        }
+        return nil
+    }
+
+    // Helper to save the compiled model URL
+    private func saveCompiledModelURL(_ url: URL) {
+        // Move compiled model to a known location
+        let destinationURL = URL(fileURLWithPath: NSTemporaryDirectory().appending("WhisperModel.mlmodelc"))
+        do {
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.moveItem(at: url, to: destinationURL)
+        } catch {
+            print("Error moving compiled model: \(error.localizedDescription)")
         }
     }
 
     private func downloadModel() {
-        let resourceRequest = NSBundleResourceRequest(tags: [modelDownloadTag])
-        resourceRequest.beginAccessingResources { [weak self] error in
+        let config = MLModelConfiguration()
+        config.computeUnits = .all
+        
+        // Assuming you have a URL to download the compiled model
+        let modelDownloadURL = URL(string: "https://yourserver.com/path/to/WhisperModel.mlmodelc")!
+        
+        let downloadTask = URLSession.shared.downloadTask(with: modelDownloadURL) { localURL, response, error in
             if let error = error {
                 print("Error downloading model: \(error.localizedDescription)")
-                // Handle download error
+                // Handle download error appropriately
                 return
             }
-            guard let modelURL = Bundle.main.url(forResource: "WhisperModel", withExtension: "mlmodelc") else {
-                print("Model not found in bundle after download")
+            
+            guard let localURL = localURL else {
+                print("Downloaded file URL is nil")
                 return
             }
-            self?.saveModelToDocuments(modelURL)
-        }
-    }
-
-    private func saveModelToDocuments(_ modelURL: URL) {
-        let fileManager = FileManager.default
-        let documentDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let destinationURL = documentDirectory.appendingPathComponent("WhisperModel.mlmodelc")
-        do {
-            if fileManager.fileExists(atPath: destinationURL.path) {
-                try fileManager.removeItem(at: destinationURL)
+            
+            do {
+                // Move the downloaded model to the local model URL
+                let modelURL = self.getLocalModelURL()
+                try FileManager.default.moveItem(at: localURL, to: modelURL)
+                print("Model downloaded and saved to \(modelURL.path)")
+                
+                // Load the model from the local URL
+                self.loadModel(from: modelURL)
+            } catch {
+                print("Error saving model: \(error.localizedDescription)")
+                // Handle file handling error
             }
-            try fileManager.copyItem(at: modelURL, to: destinationURL)
-            loadModel()
-        } catch {
-            print("Error saving model to documents directory: \(error.localizedDescription)")
         }
+        downloadTask.resume()
     }
 
     private func loadModel(from url: URL) {
