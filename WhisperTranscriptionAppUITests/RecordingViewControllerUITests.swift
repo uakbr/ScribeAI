@@ -19,7 +19,7 @@ class RecordingViewControllerUITests: XCTestCase {
         addButton.tap()
 
         // Verify that the Start Recording button exists
-        let startRecordingButton = app.buttons["Start Recording"]
+        let startRecordingButton = app.buttons["StartRecordingButton"]
         XCTAssertTrue(startRecordingButton.exists, "Start Recording button should exist")
         
         // Tap Start Recording and check UI updates

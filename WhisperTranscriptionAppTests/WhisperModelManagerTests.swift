@@ -8,7 +8,11 @@ class WhisperModelManagerTests: XCTestCase {
     override func setUp() {
         super.setUp()
         modelManager = WhisperModelManager.shared
-        try? modelManager.loadModel()
+        do {
+            try modelManager.loadModel()
+        } catch {
+            XCTFail("Failed to load model: \(error)")
+        }
     }
 
     override func tearDown() {

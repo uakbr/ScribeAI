@@ -34,6 +34,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Managers/WhisperModelManager.swift,
+				Models/WhisperTokenizer.swift,
+				Utilities/AudioRecorder.swift,
 			);
 			target = 1409A9822CEA484E0026E23C /* WhisperTranscriptionApp */;
 		};

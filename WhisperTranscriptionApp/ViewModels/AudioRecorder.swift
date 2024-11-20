@@ -28,14 +28,16 @@ class AudioRecorder: NSObject {
         switch audioSession.recordPermission {
         case .undetermined:
             audioSession.requestRecordPermission { [weak self] granted in
+                guard let self = self else { return }
                 if granted {
                     DispatchQueue.main.async {
-                        try? self?.startRecording(to: fileURL)
+                        try? self.startRecording(to: fileURL)
                     }
                 } else {
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: AudioRecorder.recordingDidStop, object: nil)
-                        if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+                        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let viewController = scene.windows.first?.rootViewController {
                             ErrorAlertManager.shared.handleMicrophonePermissionError(in: viewController)
                         }
                     }
@@ -43,7 +45,8 @@ class AudioRecorder: NSObject {
             }
             return
         case .denied:
-            if let viewController = UIApplication.shared.keyWindow?.rootViewController {
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let viewController = scene.windows.first?.rootViewController {
                 ErrorAlertManager.shared.handleMicrophonePermissionError(in: viewController)
             }
             throw AudioRecorderError.microphonePermissionDenied
@@ -54,8 +57,8 @@ class AudioRecorder: NSObject {
         }
         
         // Setup audio session
-        try audioSession.setCategory(.playAndRecord, mode: .default, options: [])
-        try audioSession.setActive(true)
+        try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         
         audioEngine = AVAudioEngine()
         guard let audioEngine = audioEngine else { return }
@@ -73,10 +76,18 @@ class AudioRecorder: NSObject {
         }
         
         audioEngine.prepare()
-        try audioEngine.start()
+        do {
+            try audioEngine.start()
+        } catch {
+            print("Error starting audio engine: \(error.localizedDescription)")
+            // Handle the error, possibly notify the user
+            return
+        }
         
         isRecording = true
-        NotificationCenter.default.post(name: AudioRecorder.recordingDidStart, object: nil)
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: AudioRecorder.recordingDidStart, object: nil)
+        }
     }
     
     func pauseRecording() {
@@ -95,6 +106,8 @@ class AudioRecorder: NSObject {
         guard isRecording else { return }
         audioEngine?.stop()
         audioEngine?.inputNode.removeTap(onBus: 0)
+        audioEngine?.reset()
+        audioEngine = nil
         audioFile = nil
         isRecording = false
         NotificationCenter.default.post(name: AudioRecorder.recordingDidStop, object: nil)
