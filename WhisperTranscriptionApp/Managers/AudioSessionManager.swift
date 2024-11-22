@@ -71,8 +71,8 @@ class AudioSessionManager {
     }
     
     func requestPermissions() async {
-        if #available(iOS 16.0, *) {
-            // Use the async method available in iOS 16 and later
+        if #available(iOS 17.0, *) {
+            // Use the async method available in iOS 17 and later
             let granted = await audioSession.requestRecordPermission()
             if !granted {
                 // Handle permission not granted
