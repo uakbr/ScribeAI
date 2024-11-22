@@ -47,7 +47,7 @@ class TranscriptionViewController: UIViewController {
     }()
     
     // MARK: - Properties
-    var transcription: Transcription?
+    var transcription: TranscriptionRecord?
     private var isPlaying = false
     private var audioPlayer: AVAudioPlayer?
     private var playbackTimer: Timer?
@@ -123,11 +123,7 @@ class TranscriptionViewController: UIViewController {
             
             startPlaybackTimer()
         } catch {
-            ErrorAlertManager.shared.showAlert(
-                title: "Playback Error",
-                message: error.localizedDescription,
-                in: self
-            )
+            showAlert(title: "Playback Error", message: error.localizedDescription)
         }
     }
     
@@ -155,7 +151,7 @@ class TranscriptionViewController: UIViewController {
             try TranscriptionStorageManager.shared.saveContext()
             navigationController?.popViewController(animated: true)
         } catch {
-            ErrorAlertManager.shared.handleStorageError(error, in: self)
+            showAlert(title: "Save Error", message: error.localizedDescription)
         }
     }
     
@@ -173,5 +169,14 @@ class TranscriptionViewController: UIViewController {
 extension TranscriptionViewController: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         stopPlayback()
+    }
+}
+
+// MARK: - Helper Methods
+extension TranscriptionViewController {
+    func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }

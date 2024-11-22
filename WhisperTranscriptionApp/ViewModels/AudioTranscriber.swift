@@ -1,13 +1,14 @@
 import Foundation
+import AVFoundation
 
 class AudioTranscriber {
     static let shared = AudioTranscriber()
     private let transcriptionQueue = DispatchQueue(label: "com.app.transcription", qos: .userInitiated)
-    private var transcriptionBuffer: [Float] = []
+    private var transcriptionBuffer: [AVAudioPCMBuffer] = []
     private let bufferLock = NSLock()
     private let maxBufferLength = 16000 * 30  // 30 seconds at 16kHz
 
-    func startTranscribing(updateHandler: @escaping (String) -> Void, errorHandler: @escaping (Error) -> Void) {
+    func startTranscribing() {
         // Start or resume transcribing
         processTranscriptionBuffer()
     }
@@ -21,11 +22,11 @@ class AudioTranscriber {
         processTranscriptionBuffer()
     }
 
-    func appendAudioData(_ data: [Float]) {
+    func appendAudioBuffer(_ buffer: AVAudioPCMBuffer) {
         transcriptionQueue.async { [weak self] in
             guard let self = self else { return }
             self.bufferLock.lock()
-            self.transcriptionBuffer.append(contentsOf: data)
+            self.transcriptionBuffer.append(buffer)
             if self.transcriptionBuffer.count > self.maxBufferLength {
                 self.transcriptionBuffer.removeFirst(self.transcriptionBuffer.count - self.maxBufferLength)
             }
@@ -41,18 +42,14 @@ class AudioTranscriber {
             self.transcriptionBuffer.removeAll()
             self.bufferLock.unlock()
 
-            // Split buffer into chunks
-            let chunkSize = 16000 * 5  // 5 seconds at 16kHz
-            let chunks = bufferCopy.chunked(into: chunkSize)
-
-            for chunk in chunks {
-                self.processAudioChunk(chunk)
+            for buffer in bufferCopy {
+                self.processAudioBuffer(buffer)
             }
         }
     }
 
-    private func processAudioChunk(_ chunk: [Float]) {
-        WhisperModelManager.shared.transcribe(audioBuffer: chunk) { result in
+    private func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
+        WhisperModelManager.shared.transcribe(audioBuffer: buffer) { result in
             switch result {
             case .success(let transcription):
                 // Handle successful transcription

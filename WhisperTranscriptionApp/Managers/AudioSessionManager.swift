@@ -45,11 +45,8 @@ class AudioSessionManager {
     
     @objc private func handleInterruption(_ notification: Notification) {
         guard let userInfo = notification.userInfo,
-              let typeValue = userInfo[AVAudioSession.InterruptionTypeKey] as? UInt else {
-            return
-        }
-        
-        guard let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
             return
         }
         
@@ -57,12 +54,12 @@ class AudioSessionManager {
         case .began:
             // Handle interruption began
             notificationCenter.post(
-                name: Notification.Name.audioSessionInterrupted,
+                name: .audioSessionInterrupted,
                 object: nil,
                 userInfo: ["type": type]
             )
         case .ended:
-            guard let optionsValue = userInfo[AVAudioSession.InterruptionOptionKey] as? UInt else { return }
+            guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
             
             if options.contains(.shouldResume) {
@@ -73,8 +70,8 @@ class AudioSessionManager {
         }
     }
     
-    func requestPermissions() async throws -> Bool {
-        return try await audioSession.requestRecordPermission()
+    func requestPermissions() async {
+        await audioSession.requestRecordPermission()
     }
     
     func activateAudioSession() throws {

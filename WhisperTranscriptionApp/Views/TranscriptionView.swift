@@ -23,12 +23,12 @@ struct TranscriptionView: View {
             
             HStack(spacing: 20) {
                 Button(action: viewModel.shareTranscription) {
-                    Label(L10n.Transcription.share, systemImage: "square.and.arrow.up")
+                    Label("Share", systemImage: "square.and.arrow.up")
                 }
                 .accessibilityHint("Shares the transcription")
                 
                 Button(action: viewModel.copyToClipboard) {
-                    Label(L10n.Transcription.copy, systemImage: "doc.on.doc")
+                    Label("Copy", systemImage: "doc.on.doc")
                 }
                 .accessibilityHint("Copies the transcription to clipboard")
             }
@@ -42,9 +42,27 @@ struct TranscriptionView: View {
                 Button(action: viewModel.deleteTranscription) {
                     Image(systemName: "trash")
                 }
-                .accessibilityLabel(L10n.Transcription.delete)
+                .accessibilityLabel("Delete")
                 .accessibilityHint("Deletes this transcription")
             }
         }
+    }
+} 
+
+// Sample ViewModel
+class TranscriptionViewModel: ObservableObject {
+    @Published var transcriptionText: String = ""
+    @Published var isLoading: Bool = false
+
+    func shareTranscription() {
+        // Implement share functionality
+    }
+
+    func copyToClipboard() {
+        // Implement copy to clipboard functionality
+    }
+
+    func deleteTranscription() {
+        // Implement delete functionality
     }
 } 
