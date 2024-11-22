@@ -61,7 +61,7 @@ class SupabaseManager {
                     .from("your_table")
                     .select()
                     .execute()
-                    .value as [YourDataType]
+                    .value as [ActualDataType]
                 // Handle the data
             } catch {
                 // Handle the error
