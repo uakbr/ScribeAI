@@ -71,7 +71,24 @@ class AudioSessionManager {
     }
     
     func requestPermissions() async {
-        await audioSession.requestRecordPermission()
+        if #available(iOS 16.0, *) {
+            // Use the async method available in iOS 16 and later
+            let granted = await audioSession.requestRecordPermission()
+            if !granted {
+                // Handle permission not granted
+                print("Microphone permission not granted")
+                // You can post a notification or handle UI updates here
+            }
+        } else {
+            // Fallback on earlier versions using the closure-based method
+            audioSession.requestRecordPermission { granted in
+                if !granted {
+                    // Handle permission not granted
+                    print("Microphone permission not granted")
+                    // Handle UI updates on the main thread if needed
+                }
+            }
+        }
     }
     
     func activateAudioSession() throws {
@@ -93,4 +110,4 @@ enum AudioSessionError: Error {
     case configurationFailed
     case activationFailed
     case permissionDenied
-} 
+}

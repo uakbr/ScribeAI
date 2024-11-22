@@ -1,5 +1,6 @@
 import Foundation
 import CloudKit
+import CoreData
 
 class CloudKitManager {
     static let shared = CloudKitManager()
@@ -38,6 +39,7 @@ class CloudKitManager {
     }
 
     func fetchTranscriptions(completion: @escaping (Result<[TranscriptionRecord], Error>) -> Void) {
+        let context = TranscriptionStorageManager.shared.context
         let query = CKQuery(recordType: "Transcription", predicate: NSPredicate(value: true))
         query.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
 
@@ -45,7 +47,7 @@ class CloudKitManager {
         var fetchedTranscriptions: [TranscriptionRecord] = []
 
         operation.recordFetchedBlock = { record in
-            if let transcription = TranscriptionRecord(record: record) {
+            if let transcription = TranscriptionRecord(record: record, context: context) {
                 fetchedTranscriptions.append(transcription)
             }
         }
@@ -55,7 +57,13 @@ class CloudKitManager {
                 if let error = error {
                     completion(.failure(error))
                 } else {
-                    completion(.success(fetchedTranscriptions))
+                    // Save context after fetching data
+                    do {
+                        try context.save()
+                        completion(.success(fetchedTranscriptions))
+                    } catch {
+                        completion(.failure(error))
+                    }
                 }
             }
         }
@@ -74,4 +82,4 @@ class CloudKitManager {
             }
         }
     }
-} 
+}

@@ -32,7 +32,7 @@ class SupabaseManager {
         let newTranscription = NewTranscription(content: transcription, created_at: Date().iso8601String)
         try await client.database
             .from("transcriptions")
-            .insert(newTranscription)
+            .insert(values: newTranscription)
             .execute()
     }
 
@@ -42,7 +42,7 @@ class SupabaseManager {
         let response = try await client.database
             .from("transcriptions")
             .select()
-            .order(column: "created_at", ascending: false)
+            .order("created_at", ascending: false)
             .execute()
             .value
 
