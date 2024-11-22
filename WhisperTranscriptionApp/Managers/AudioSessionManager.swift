@@ -1,15 +1,13 @@
 import Foundation
 import AVFoundation
-import UserNotifications
 import UIKit
 
 class AudioSessionManager {
     static let shared = AudioSessionManager()
-    private var audioSession: AVAudioSession
-    private let notificationCenter = UNUserNotificationCenter.current()
+    private let audioSession = AVAudioSession.sharedInstance()
+    private let notificationCenter = NotificationCenter.default
     
     private init() {
-        self.audioSession = AVAudioSession.sharedInstance()
         setupNotifications()
         setupAudioSession()
     }
@@ -23,7 +21,7 @@ class AudioSessionManager {
     }
     
     private func setupNotifications() {
-        NotificationCenter.default.addObserver(
+        notificationCenter.addObserver(
             self,
             selector: #selector(handleInterruption(_:)),
             name: AVAudioSession.interruptionNotification,
@@ -51,11 +49,18 @@ class AudioSessionManager {
             return
         }
         
-        let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        guard let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+        
         switch type {
         case .began:
             // Handle interruption began
-            NotificationCenter.default.post(name: .audioSessionInterrupted, object: nil)
+            notificationCenter.post(
+                name: Notification.Name.audioSessionInterrupted,
+                object: nil,
+                userInfo: ["type": type]
+            )
         case .ended:
             guard let optionsValue = userInfo[AVAudioSession.InterruptionOptionKey] as? UInt else { return }
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
@@ -69,7 +74,6 @@ class AudioSessionManager {
     }
     
     func requestPermissions() async throws -> Bool {
-        // Request microphone permissions
         return try await audioSession.requestRecordPermission()
     }
     

@@ -152,8 +152,10 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
     @objc private func signInTapped() {
         Task {
             do {
-                guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
-                      let password = passwordTextField.text, !password.isEmpty else {
+                guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+                      !email.isEmpty,
+                      let password = passwordTextField.text,
+                      !password.isEmpty else {
                     ErrorAlertManager.shared.showAlert(
                         title: "Missing Information",
                         message: "Please enter both email and password.",
@@ -162,7 +164,7 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
                     return
                 }
 
-                let session = try await SupabaseManager.shared.signIn(email: email, password: password)
+                let user = try await SupabaseManager.shared.signIn(email: email, password: password)
                 DispatchQueue.main.async {
                     self.presentMainInterface()
                 }
@@ -236,7 +238,6 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
     // MARK: - ASAuthorizationControllerDelegate
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            // Retrieve user identity token
             guard let identityToken = appleIDCredential.identityToken,
                   let tokenString = String(data: identityToken, encoding: .utf8) else {
                 ErrorAlertManager.shared.showAlert(
@@ -247,13 +248,16 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
                 return
             }
             
-            // Sign in with Supabase using the Apple identity token
-            SupabaseManager.shared.client.auth.signIn(provider: .apple, credentials: ["id_token": tokenString]) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(_):
-                        self?.presentMainInterface()
-                    case .failure(let error):
+            Task {
+                do {
+                    let session = try await SupabaseManager.shared.client.auth.signInWithIdToken(
+                        credentials: .init(provider: .apple, idToken: tokenString)
+                    )
+                    DispatchQueue.main.async {
+                        self.presentMainInterface()
+                    }
+                } catch {
+                    DispatchQueue.main.async {
                         ErrorAlertManager.shared.showAlert(
                             title: "Authentication Error",
                             message: error.localizedDescription,

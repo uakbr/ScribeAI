@@ -5,9 +5,8 @@
       "package" : "supabase-swift",
       "repositoryURL" : "https://github.com/supabase/supabase-swift.git",
       "state" : {
-        "branch" : null,
-        "revision" : "REPLACE_WITH_ACTUAL_REVISION",
-        "version" : "2.0.0"
+        "revision" : "c5d5e3eb7b8db485494949d3aa94323d7db51a8b",
+        "version" : "2.3.1"
       }
     },
     {

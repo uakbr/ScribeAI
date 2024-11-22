@@ -1,7 +1,6 @@
 import WidgetKit
 import SwiftUI
 
-@main
 struct TranscriptionWidget: Widget {
     private let kind = "TranscriptionWidget"
     

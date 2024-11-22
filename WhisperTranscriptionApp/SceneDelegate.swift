@@ -12,24 +12,28 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(windowScene: windowScene)
         
         // Determine the initial view controller
-        if isFirstLaunch() {
-            presentOnboardingInterface()
-        } else if let _ = try? SupabaseManager.shared.client.auth.session {
-            presentMainInterface()
-        } else {
-            presentLoginInterface()
+        Task {
+            if isFirstLaunch() {
+                presentOnboardingInterface()
+            } else if await isUserAuthenticated() {
+                presentMainInterface()
+            } else {
+                presentLoginInterface()
+            }
         }
         
         window?.makeKeyAndVisible()
     }
 
     // MARK: - Authentication Check
-    private func isUserAuthenticated() -> Bool {
-        // Check if Supabase session exists and is valid
-        if let session = SupabaseManager.shared.client.auth.session, session.user != nil {
-            return true
+    private func isUserAuthenticated() async -> Bool {
+        do {
+            let session = try await SupabaseManager.shared.client.auth.session
+            return session?.user != nil
+        } catch {
+            print("Authentication check failed: \(error)")
+            return false
         }
-        return false
     }
 
     // MARK: - Interface Presentation
