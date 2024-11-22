@@ -15,24 +15,18 @@ class SupabaseManager {
     // MARK: - Authentication Methods
 
     func signIn(email: String, password: String) async throws -> User {
-        let response = try await client.auth.signIn(
+        let user = try await client.auth.signIn(
             email: email,
             password: password
         )
-        guard let user = response.user else {
-            throw AuthenticationError.noSession
-        }
         return user
     }
 
     func signUp(email: String, password: String) async throws -> User {
-        let response = try await client.auth.signUp(
+        let user = try await client.auth.signUp(
             email: email,
             password: password
         )
-        guard let user = response.user else {
-            throw AuthenticationError.noSession
-        }
         return user
     }
 

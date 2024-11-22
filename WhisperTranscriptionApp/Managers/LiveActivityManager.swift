@@ -6,11 +6,10 @@ class LiveActivityManager {
     private var currentActivity: Activity<RecordingAttributes>?
     
     func startRecordingActivity() {
-        let attributes = RecordingAttributes()
+        let attributes = RecordingAttributes(sessionName: "Recording Session")
         let initialContentState = RecordingAttributes.ContentState(
-            isRecording: true,
-            duration: 0,
-            transcription: ""
+            elapsedTime: 0,
+            transcriptionProgress: ""
         )
         do {
             let activity = try Activity.request(
@@ -30,9 +29,8 @@ class LiveActivityManager {
         }
 
         let updatedContentState = RecordingAttributes.ContentState(
-            isRecording: true,
-            duration: duration,
-            transcription: transcription
+            elapsedTime: duration,
+            transcriptionProgress: transcription
         )
 
         Task {

@@ -29,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func isUserAuthenticated() async -> Bool {
         do {
             let session = try await SupabaseManager.shared.client.auth.session
-            return session?.user != nil
+            return session.user != nil
         } catch {
             print("Authentication check failed: \(error)")
             return false

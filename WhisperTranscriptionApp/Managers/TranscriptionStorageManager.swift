@@ -29,7 +29,7 @@ class TranscriptionStorageManager {
     // MARK: - CRUD Methods
     func saveTranscription(text: String, date: Date, duration: TimeInterval, audioURL: URL?) throws {
         let context = persistentContainer.viewContext
-        let transcription = Transcription(context: context)
+        let transcription = TranscriptionRecord(context: context)
         transcription.text = text
         transcription.date = date
         transcription.duration = duration
@@ -43,9 +43,9 @@ class TranscriptionStorageManager {
         }
     }
     
-    func fetchTranscriptions() -> [Transcription] {
+    func fetchTranscriptions() -> [TranscriptionRecord] {
         let context = persistentContainer.viewContext
-        let fetchRequest: NSFetchRequest<Transcription> = Transcription.fetchRequest()
+        let fetchRequest: NSFetchRequest<TranscriptionRecord> = TranscriptionRecord.fetchRequest()
         
         // Add sort descriptors and fetch limits if necessary
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
@@ -60,7 +60,7 @@ class TranscriptionStorageManager {
         }
     }
     
-    func deleteTranscription(_ transcription: Transcription) throws {
+    func deleteTranscription(_ transcription: TranscriptionRecord) throws {
         let context = persistentContainer.viewContext
         context.delete(transcription)
         
@@ -78,10 +78,7 @@ class TranscriptionStorageManager {
             do {
                 try context.save()
             } catch {
-                ErrorAlertManager.shared.showAlert(
-                    title: "Save Error",
-                    message: "Failed to save transcription: \(error.localizedDescription)"
-                )
+                print("Failed to save context: \(error.localizedDescription)")
             }
         }
     }
