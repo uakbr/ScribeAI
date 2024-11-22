@@ -152,6 +152,16 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
     @objc private func signInTapped() {
         Task {
             do {
+                guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
+                      let password = passwordTextField.text, !password.isEmpty else {
+                    ErrorAlertManager.shared.showAlert(
+                        title: "Missing Information",
+                        message: "Please enter both email and password.",
+                        in: self
+                    )
+                    return
+                }
+
                 let session = try await SupabaseManager.shared.signIn(email: email, password: password)
                 DispatchQueue.main.async {
                     self.presentMainInterface()
@@ -169,35 +179,32 @@ class LoginViewController: UIViewController, ASAuthorizationControllerDelegate, 
     }
     
     @objc private func signUpTapped() {
-        view.endEditing(true)
-        guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty else {
-            ErrorAlertManager.shared.showAlert(
-                title: "Missing Information",
-                message: "Please enter both email and password.",
-                in: self
-            )
-            return
-        }
-        
-        activityIndicator.startAnimating()
-        
-        SupabaseManager.shared.client.auth.signUp(email: email, password: password) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.activityIndicator.stopAnimating()
-                
-                switch result {
-                case .success(let session):
-                    let message = session.user?.confirmedAt == nil ? "A verification email has been sent to your email address." : "Sign up successful!"
+        Task {
+            do {
+                guard let email = emailTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), !email.isEmpty,
+                      let password = passwordTextField.text, !password.isEmpty else {
+                    ErrorAlertManager.shared.showAlert(
+                        title: "Missing Information",
+                        message: "Please enter both email and password.",
+                        in: self
+                    )
+                    return
+                }
+
+                let session = try await SupabaseManager.shared.signUp(email: email, password: password)
+                DispatchQueue.main.async {
+                    let message = session.user.emailConfirmedAt == nil ? "A verification email has been sent to your email address." : "Sign up successful!"
                     ErrorAlertManager.shared.showAlert(
                         title: "Sign Up",
                         message: message,
                         in: self
                     )
-                    if session.user?.confirmedAt != nil {
-                        self?.presentMainInterface()
+                    if session.user.emailConfirmedAt != nil {
+                        self.presentMainInterface()
                     }
-                case .failure(let error):
+                }
+            } catch {
+                DispatchQueue.main.async {
                     ErrorAlertManager.shared.showAlert(
                         title: "Sign Up Error",
                         message: error.localizedDescription,

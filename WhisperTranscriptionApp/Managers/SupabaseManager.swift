@@ -14,12 +14,12 @@ class SupabaseManager {
 
     // MARK: - Authentication Methods
 
-    func signIn(email: String, password: String) async throws -> UserSession {
+    func signIn(email: String, password: String) async throws -> Session {
         let session = try await client.auth.signIn(email: email, password: password)
         return session
     }
 
-    func signUp(email: String, password: String) async throws -> UserSession {
+    func signUp(email: String, password: String) async throws -> Session {
         let session = try await client.auth.signUp(email: email, password: password)
         return session
     }
@@ -30,20 +30,39 @@ class SupabaseManager {
         let newTranscription = NewTranscription(content: transcription, created_at: Date().iso8601String)
         _ = try await client.database
             .from("transcriptions")
-            .insert([newTranscription])
-            .execute()
+            .insert(values: newTranscription)
     }
 
     // MARK: - Fetch Transcriptions
 
     func fetchTranscriptions() async throws -> [Transcription] {
-        let data = try await client.database
+        let response = try await client.database
             .from("transcriptions")
             .select()
-            .order("created_at", ascending: false)
+            .order(column: "created_at", ascending: false)
             .execute()
-            .decoded(to: [Transcription].self)
+        
+        let data = try response.decoded(to: [Transcription].self)
         return data
+    }
+
+    // MARK: - Example Database Function
+
+    func someDatabaseFunction() {
+        Task {
+            do {
+                let response = try await client.database
+                    .from("your_table")
+                    .select()
+                    .execute()
+                
+                let data = try response.decoded(to: [YourDataType].self)
+                // Handle the data
+            } catch {
+                // Handle the error
+                print("Database error: \(error.localizedDescription)")
+            }
+        }
     }
 }
 
