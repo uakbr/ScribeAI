@@ -9,8 +9,15 @@ class CloudKitManager {
 
     func saveTranscription(_ transcription: TranscriptionRecord, completion: @escaping (Result<Void, Error>) -> Void) {
         let record = CKRecord(recordType: "Transcription")
-        record["text"] = transcription.text as CKRecordValue
-        record["date"] = transcription.date as CKRecordValue
+
+        if let text = transcription.text {
+            record["text"] = text as CKRecordValue
+        }
+
+        if let date = transcription.date {
+            record["date"] = date as CKRecordValue
+        }
+
         record["duration"] = transcription.duration as CKRecordValue
 
         // Handle audio data as CKAsset if applicable

@@ -15,11 +15,15 @@ extension TranscriptionDTO {
     func toCoreDataEntity(in context: NSManagedObjectContext) -> TranscriptionRecord {
         let record = TranscriptionRecord(context: context)
         record.id = id
-        record.user_id = user_id
         record.text = text
         record.date = date
         record.duration = duration
-        record.audio_url = URL(string: audio_url ?? "")
+        
+        // Adjust property names to match your Core Data model
+        record.userID = user_id
+        if let audioURLString = audio_url {
+            record.audioURL = URL(string: audioURLString)
+        }
         return record
     }
 }

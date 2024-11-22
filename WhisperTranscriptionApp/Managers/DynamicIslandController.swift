@@ -7,19 +7,16 @@ class DynamicIslandController {
     
     // Start the Dynamic Island updates
     func startDynamicIsland(sessionName: String) {
-        LiveActivityManager.shared.startLiveActivity(sessionName: sessionName)
+        LiveActivityManager.shared.startRecordingActivity()
     }
     
     // Update the Dynamic Island with real-time data
     func updateDynamicIsland(elapsedTime: TimeInterval, transcriptionProgress: String) {
-        LiveActivityManager.shared.updateLiveActivity(
-            elapsedTime: elapsedTime,
-            transcriptionProgress: transcriptionProgress
-        )
+        LiveActivityManager.shared.updateRecordingProgress(duration: elapsedTime, transcription: transcriptionProgress)
     }
     
     // End the Dynamic Island updates
     func endDynamicIsland() {
-        LiveActivityManager.shared.endLiveActivity()
+        LiveActivityManager.shared.endRecordingActivity()
     }
 }

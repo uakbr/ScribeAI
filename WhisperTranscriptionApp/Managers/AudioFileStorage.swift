@@ -1,7 +1,7 @@
 import Foundation
 import AVFoundation
 
-class AudioFileStorage {
+class AudioFileStorage: NSObject {
     static let shared = AudioFileStorage()
     
     private let fileManager = FileManager.default
@@ -26,10 +26,7 @@ class AudioFileStorage {
         do {
             try fileManager.removeItem(at: url)
         } catch {
-            ErrorAlertManager.shared.showAlert(
-                title: "Delete Error",
-                message: "Failed to delete audio file: \(error.localizedDescription)"
-            )
+            print("Failed to delete audio file: \(error.localizedDescription)")
         }
     }
     
@@ -55,10 +52,7 @@ class AudioFileStorage {
             }
             
         } catch {
-            ErrorAlertManager.shared.showAlert(
-                title: "Playback Error",
-                message: "Failed to play audio file: \(error.localizedDescription)"
-            )
+            print("Failed to play audio file: \(error.localizedDescription)")
         }
     }
     
@@ -77,10 +71,7 @@ class AudioFileStorage {
             let audio = try AVAudioFile(forReading: url)
             return Double(audio.length) / audio.processingFormat.sampleRate
         } catch {
-            ErrorAlertManager.shared.showAlert(
-                title: "File Error",
-                message: "Failed to get audio duration: \(error.localizedDescription)"
-            )
+            print("Failed to get audio duration: \(error.localizedDescription)")
             return nil
         }
     }
