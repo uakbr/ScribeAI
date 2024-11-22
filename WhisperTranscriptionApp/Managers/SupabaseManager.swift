@@ -15,12 +15,18 @@ class SupabaseManager {
     // MARK: - Authentication Methods
 
     func signIn(email: String, password: String) async throws -> Session {
-        let session = try await client.auth.signIn(email: email, password: password)
+        let response = try await client.auth.signIn(email: email, password: password)
+        guard let session = response.session else {
+            throw AuthenticationError.noSession
+        }
         return session
     }
 
     func signUp(email: String, password: String) async throws -> Session {
-        let session = try await client.auth.signUp(email: email, password: password)
+        let response = try await client.auth.signUp(email: email, password: password)
+        guard let session = response.session else {
+            throw AuthenticationError.noSession
+        }
         return session
     }
 
@@ -30,19 +36,19 @@ class SupabaseManager {
         let newTranscription = NewTranscription(content: transcription, created_at: Date().iso8601String)
         _ = try await client.database
             .from("transcriptions")
-            .insert(values: newTranscription)
+            .insert(newTranscription)
     }
 
     // MARK: - Fetch Transcriptions
 
     func fetchTranscriptions() async throws -> [Transcription] {
-        let response = try await client.database
+        let data = try await client.database
             .from("transcriptions")
             .select()
-            .order(column: "created_at", ascending: false)
+            .order("created_at", ascending: false)
             .execute()
-        
-        let data = try response.decoded(to: [Transcription].self)
+            .value
+
         return data
     }
 
@@ -51,12 +57,11 @@ class SupabaseManager {
     func someDatabaseFunction() {
         Task {
             do {
-                let response = try await client.database
+                let data = try await client.database
                     .from("your_table")
                     .select()
                     .execute()
-                
-                let data = try response.decoded(to: [YourDataType].self)
+                    .value as [YourDataType]
                 // Handle the data
             } catch {
                 // Handle the error
