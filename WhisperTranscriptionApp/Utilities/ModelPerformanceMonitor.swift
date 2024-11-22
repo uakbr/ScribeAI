@@ -1,32 +1,33 @@
+import Foundation
 import os.log
 
 class ModelPerformanceMonitor {
     static let shared = ModelPerformanceMonitor()
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ModelPerformance")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "WhisperTranscriptionApp", category: "ModelPerformance")
     
-    private var metrics: [String: [TimeInterval]] = [:]
-    private let queue = DispatchQueue(label: "com.app.modelperformance")
+    private init() {}
     
-    func startTranscription() -> OSSignpostID {
-        let signpostID = OSSignpostID(log: .default)
-        os_signpost(.begin, log: .default, name: "Transcription", signpostID: signpostID)
-        return signpostID
+    func logTranscriptionPerformance(duration: TimeInterval, audioLength: TimeInterval) {
+        logger.log("Transcription completed - Processing time: \(duration)s for \(audioLength)s of audio")
+        
+        // Calculate real-time factor
+        let rtf = duration / audioLength
+        logger.log("Real-time factor: \(rtf)")
     }
     
-    func endTranscription(_ signpostID: OSSignpostID, duration: TimeInterval, audioLength: TimeInterval) {
-        os_signpost(.end, log: .default, name: "Transcription", signpostID: signpostID)
+    func logMemoryUsage() {
+        var info = mach_task_basic_info()
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
         
-        queue.async { [weak self] in
-            self?.logMetrics(duration: duration, audioLength: audioLength)
+        let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
+                task_info(mach_task_self_, task_flavor_t(MACH_TASK_BASIC_INFO), $0, &count)
+            }
         }
-    }
-    
-    private func logMetrics(duration: TimeInterval, audioLength: TimeInterval) {
-        let processingRatio = duration / audioLength
-        logger.info("Transcription completed - Processing time: \(duration)s, Audio length: \(audioLength)s, Ratio: \(processingRatio)")
         
-        if processingRatio > 1.0 {
-            logger.warning("Transcription taking longer than real-time")
+        if kerr == KERN_SUCCESS {
+            let usedMB = Double(info.resident_size) / 1024.0 / 1024.0
+            logger.log("Memory used: \(usedMB) MB")
         }
     }
 } 

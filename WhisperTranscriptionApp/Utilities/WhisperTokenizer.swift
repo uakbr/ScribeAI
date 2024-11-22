@@ -48,4 +48,13 @@ class WhisperTokenizer {
             throw TokenizationError.tokenNotFound(token)
         }
     }
+
+    func decode(_ indices: [Int]) -> String {
+        synchronizationQueue.sync {
+            let tokens = indices.compactMap { index -> String? in
+                tokenToIndexMap.first { $0.value == index }?.key
+            }
+            return tokens.joined(separator: " ")
+        }
+    }
 } 

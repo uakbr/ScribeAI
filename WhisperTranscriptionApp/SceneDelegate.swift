@@ -14,7 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Determine the initial view controller
         if isFirstLaunch() {
             presentOnboardingInterface()
-        } else if isUserAuthenticated() {
+        } else if let _ = try? SupabaseManager.shared.client.auth.session {
             presentMainInterface()
         } else {
             presentLoginInterface()
@@ -46,19 +46,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // MARK: - Onboarding Check
     private func isFirstLaunch() -> Bool {
-        let hasLaunchedKey = "hasLaunchedBefore"
-        let userDefaults = UserDefaults.standard
-        if userDefaults.bool(forKey: hasLaunchedKey) {
-            return false
-        } else {
-            userDefaults.set(true, forKey: hasLaunchedKey)
+        let hasLaunchedBefore = UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        if !hasLaunchedBefore {
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
             return true
         }
+        return false
     }
 
     private func presentOnboardingInterface() {
         let onboardingVC = OnboardingViewController()
-        window?.rootViewController = onboardingVC
+        window?.rootViewController = UINavigationController(rootViewController: onboardingVC)
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
