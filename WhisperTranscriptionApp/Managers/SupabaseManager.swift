@@ -16,17 +16,13 @@ class SupabaseManager {
 
     func signIn(email: String, password: String) async throws -> User {
         let session = try await client.auth.signIn(email: email, password: password)
-        guard let user = session.user else {
-            throw AuthenticationError.noSession
-        }
+        let user = session.user
         return user
     }
 
     func signUp(email: String, password: String) async throws -> User {
         let response = try await client.auth.signUp(email: email, password: password)
-        guard let user = response.user else {
-            throw AuthenticationError.noSession
-        }
+        let user = response.user
         return user
     }
 
@@ -46,10 +42,10 @@ class SupabaseManager {
         let response = try await client.database
             .from("transcriptions")
             .select()
-            .order("created_at", ascending: false)
+            .order(column: "created_at", ascending: false)
             .execute()
             .value
-        
+
         let decoder = JSONDecoder()
         let data = try JSONSerialization.data(withJSONObject: response)
         return try decoder.decode([Transcription].self, from: data)
@@ -81,4 +77,4 @@ private extension Date {
 
 enum AuthenticationError: Error {
     case noSession
-} 
+}

@@ -3,29 +3,27 @@ import CoreData
 
 class TranscriptionStorageManager {
     static let shared = TranscriptionStorageManager()
-    
+
     private init() {
         // Private initializer to ensure singleton pattern
     }
-    
+
     // MARK: - Core Data Stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "WhisperTranscriptionApp")
         container.loadPersistentStores(completionHandler: { (_, error) in
             if let error = error {
-                ErrorAlertManager.shared.showAlert(
-                    title: "Data Error",
-                    message: "Failed to load persistent stores: \(error.localizedDescription)"
-                )
+                print("Failed to load persistent stores: \(error.localizedDescription)")
+                // Handle the error appropriately, e.g., log it or terminate the app
             }
         })
         return container
     }()
-    
+
     var context: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
-    
+
     // MARK: - CRUD Methods
     func saveTranscription(text: String, date: Date, duration: TimeInterval, audioURL: URL?) throws {
         let context = persistentContainer.viewContext
@@ -34,22 +32,21 @@ class TranscriptionStorageManager {
         transcription.date = date
         transcription.duration = duration
         transcription.audioURL = audioURL
-        
+
         do {
             try context.save()
         } catch {
             print("Failed to save transcription: \(error.localizedDescription)")
-            // Throw the error to be handled by the caller
             throw error
         }
     }
-    
+
     func fetchTranscriptions() -> [TranscriptionRecord] {
         let context = persistentContainer.viewContext
         let fetchRequest: NSFetchRequest<TranscriptionRecord> = TranscriptionRecord.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
         fetchRequest.fetchBatchSize = 20
-        
+
         do {
             let transcriptions = try context.fetch(fetchRequest)
             return transcriptions
@@ -58,19 +55,18 @@ class TranscriptionStorageManager {
             return []
         }
     }
-    
+
     func deleteTranscription(_ transcription: TranscriptionRecord) throws {
         let context = persistentContainer.viewContext
         context.delete(transcription)
-        
+
         do {
             try context.save()
         } catch {
-            // Throw the error to be handled by the caller
             throw error
         }
     }
-    
+
     // MARK: - Save Context
     func saveContext() {
         if context.hasChanges {
@@ -86,7 +82,6 @@ class TranscriptionStorageManager {
         // Fetch local and remote transcriptions
         // Compare and resolve conflicts
         // Update both local and remote storage
-        // Inform the user of sync status
         DispatchQueue.main.async {
             // Update UI or notify user
         }

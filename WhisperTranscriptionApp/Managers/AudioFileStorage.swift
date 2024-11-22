@@ -10,7 +10,7 @@ class AudioFileStorage: NSObject, AVAudioPlayerDelegate {
     private var progressHandler: ((Double) -> Void)?
     private var completionHandler: (() -> Void)?
     
-    private init() {}
+    private override init() {}
     
     // MARK: - File Management
     func getDocumentsDirectory() -> URL {
@@ -77,7 +77,7 @@ class AudioFileStorage: NSObject, AVAudioPlayerDelegate {
     }
     
     // MARK: - AVAudioPlayerDelegate
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    @objc func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         stopPlayback()
         completionHandler?()
     }
