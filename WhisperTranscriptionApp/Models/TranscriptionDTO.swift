@@ -19,10 +19,11 @@ extension TranscriptionDTO {
         record.date = date
         record.duration = duration
         
-        // Adjust property names to match your Core Data model
-        record.userID = user_id
+        // Updated property name to match Core Data model
+        record.user_id = user_id
+        
         if let audioURLString = audio_url {
-            record.audioURL = URL(string: audioURLString)
+            record.audio_url = URL(string: audioURLString)
         }
         return record
     }

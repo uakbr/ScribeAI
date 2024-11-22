@@ -1,7 +1,7 @@
 import Foundation
 import AVFoundation
 
-class AudioFileStorage: NSObject {
+class AudioFileStorage: NSObject, AVAudioPlayerDelegate {
     static let shared = AudioFileStorage()
     
     private let fileManager = FileManager.default
@@ -75,10 +75,8 @@ class AudioFileStorage: NSObject {
             return nil
         }
     }
-}
-
-// MARK: - AVAudioPlayerDelegate
-extension AudioFileStorage: AVAudioPlayerDelegate {
+    
+    // MARK: - AVAudioPlayerDelegate
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         stopPlayback()
         completionHandler?()

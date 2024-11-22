@@ -43,7 +43,9 @@ class LiveActivityManager {
     }
     
     func endRecordingActivity() {
-        currentActivity?.end(dismissalPolicy: .immediate)
-        currentActivity = nil
+        Task {
+            await currentActivity?.end(dismissalPolicy: .immediate)
+            currentActivity = nil
+        }
     }
 } 
