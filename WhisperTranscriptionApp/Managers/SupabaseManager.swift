@@ -7,7 +7,7 @@ class SupabaseManager {
 
     private init() {
         let supabaseURL = URL(string: "https://zmmvaaxiuqlfqrxfdsye.supabase.co")!
-        let supabaseKey = "your-supabase-anon-key"
+        let supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InptbXZhYXhpdXFsZnFyeGZkc3llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIwNzc3MTAsImV4cCI6MjA0NzY1MzcxMH0.9rAhxsLCuEy2sEYaLdA3thgt2zW6r-z32s12YhIn9tQ"
 
         client = SupabaseClient(supabaseURL: supabaseURL, supabaseKey: supabaseKey)
     }
@@ -15,18 +15,12 @@ class SupabaseManager {
     // MARK: - Authentication Methods
 
     func signIn(email: String, password: String) async throws -> Session {
-        let response = try await client.auth.signIn(email: email, password: password)
-        guard let session = response.session else {
-            throw AuthenticationError.noSession
-        }
+        let session = try await client.auth.signInWithPassword(email: email, password: password)
         return session
     }
 
     func signUp(email: String, password: String) async throws -> Session {
-        let response = try await client.auth.signUp(email: email, password: password)
-        guard let session = response.session else {
-            throw AuthenticationError.noSession
-        }
+        let session = try await client.auth.signUp(email: email, password: password)
         return session
     }
 
@@ -42,13 +36,13 @@ class SupabaseManager {
     // MARK: - Fetch Transcriptions
 
     func fetchTranscriptions() async throws -> [Transcription] {
-        let data = try await client.database
+        let response = try await client.database
             .from("transcriptions")
             .select()
-            .order("created_at", ascending: false)
+            .order(column: "created_at", ascending: false)
             .execute()
-            .value
-
+        
+        let data = try response.decoded(to: [Transcription].self)
         return data
     }
 
@@ -57,11 +51,12 @@ class SupabaseManager {
     func someDatabaseFunction() {
         Task {
             do {
-                let data = try await client.database
+                let response = try await client.database
                     .from("your_table")
                     .select()
                     .execute()
-                    .value as [ActualDataType]
+                
+                let data = try response.decoded(to: [YourDataType].self)
                 // Handle the data
             } catch {
                 // Handle the error

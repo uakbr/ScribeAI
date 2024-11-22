@@ -1,6 +1,10 @@
 import Foundation
 import NaturalLanguage
 
+enum TokenizationError: Error {
+    case tokenNotFound(String)
+}
+
 class WhisperTokenizer {
     static let shared = WhisperTokenizer()
     private var tokenToIndexMap: [String: Int] = [:]
@@ -19,7 +23,6 @@ class WhisperTokenizer {
         }
         
         self.tokenToIndexMap = tokens
-    }
     }
 
     func encode(_ text: String) throws -> [Int] {

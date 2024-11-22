@@ -43,9 +43,9 @@
 			membershipExceptions = (
 				Info.plist,
 				Managers/WhisperModelManager.swift,
+				"Models/TranscriptionRecord+CoreDataClass.swift",
 				"Models/TranscriptionRecord+CoreDataProperties.swift",
 				Models/WhisperModel.mlmodel,
-				Models/WhisperTokenizer.swift,
 				Utilities/AudioRecorder.swift,
 			);
 			target = 1409A9822CEA484E0026E23C /* WhisperTranscriptionApp */;
